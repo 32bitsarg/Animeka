@@ -40,13 +40,13 @@ export default function HeroBanner({
       </div>
 
       {/* Contenido */}
-      <div className="relative z-10 h-full flex items-end pb-8 sm:pb-12 md:pb-16 lg:pb-24">
+      <div className="relative z-10 h-full flex flex-col justify-end pb-8 sm:pb-12 md:pb-16 lg:pb-24 pt-16 md:pt-20">
         <div className="container mx-auto px-3 sm:px-4 md:px-6 w-full">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="max-w-4xl mt-20 md:mt-24"
+            className="max-w-4xl"
           >
             {subtitle && (
               <motion.div
