@@ -36,6 +36,11 @@ const nextConfig: NextConfig = {
 
   // Modo experimental
   experimental: {
+    optimizePackageImports: [
+      '@fortawesome/react-fontawesome',
+      '@fortawesome/free-solid-svg-icons',
+      'framer-motion',
+    ],
     serverMinification: true,
     serverSourceMaps: false,
   },

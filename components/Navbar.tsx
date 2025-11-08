@@ -80,6 +80,7 @@ export default function Navbar() {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link 
                   href="/recomendar"
+                  prefetch={true}
                   className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#CF50F2] to-[#8552F2] text-white font-bold shadow-lg shadow-[#CF50F2]/30 hover:shadow-[#CF50F2]/50 transition-all"
                 >
                   ✨ Recomendar
@@ -92,7 +93,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-4">
             {session ? (
               <>
-                <Link href="/perfil">
+                <Link href="/perfil" prefetch={true}>
                   <motion.div 
                     whileHover={{ scale: 1.05 }}
                     className="flex items-center space-x-3 px-4 py-2 rounded-lg bg-card/50 hover:bg-card/70 transition-colors cursor-pointer"
@@ -135,7 +136,7 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link href="/auth/signin">
+                <Link href="/auth/signin" prefetch={true}>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -144,7 +145,7 @@ export default function Navbar() {
                     Iniciar Sesión
                   </motion.button>
                 </Link>
-                <Link href="/auth/signup">
+                <Link href="/auth/signup" prefetch={true}>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -250,7 +251,7 @@ export default function Navbar() {
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href}>
+    <Link href={href} prefetch={true}>
       <motion.span
         whileHover={{ scale: 1.05 }}
         className="text-foreground/80 hover:text-foreground transition-colors cursor-pointer"
@@ -263,7 +264,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
 
 function MobileNavLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href} className="block px-3 py-2 rounded-lg hover:bg-card-hover transition-colors">
+    <Link href={href} prefetch={true} className="block px-3 py-2 rounded-lg hover:bg-card-hover transition-colors">
       {children}
     </Link>
   )

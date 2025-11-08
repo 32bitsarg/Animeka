@@ -22,15 +22,23 @@ export default function HomePage() {
     async function fetchData() {
       setLoading(true)
       try {
-        const [seasonData, popularData, topRatedData] = await Promise.all([
+        // Usar Promise.allSettled para que si una falla, las otras continúen
+        const results = await Promise.allSettled([
           getCurrentSeasonAnime(1),
           getTopAnime(1, 12),
           getTopRatedAnime(1, 12),
         ])
 
-        if (seasonData?.data) setCurrentSeasonAnime(seasonData.data.slice(0, 12))
-        if (popularData?.data) setPopularAnime(popularData.data)
-        if (topRatedData?.data) setTopRatedAnime(topRatedData.data)
+        // Procesar resultados independientemente
+        if (results[0].status === 'fulfilled' && results[0].value?.data) {
+          setCurrentSeasonAnime(results[0].value.data.slice(0, 12))
+        }
+        if (results[1].status === 'fulfilled' && results[1].value?.data) {
+          setPopularAnime(results[1].value.data)
+        }
+        if (results[2].status === 'fulfilled' && results[2].value?.data) {
+          setTopRatedAnime(results[2].value.data)
+        }
       } catch (error) {
         console.error('Error fetching anime data:', error)
       } finally {
@@ -51,20 +59,20 @@ export default function HomePage() {
         imageUrl="https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2000"
       >
         <div className="flex flex-wrap gap-4">
-          <Link href="/discover">
+          <Link href="/discover" prefetch={true}>
             <Button size="lg" variant="primary">
               <FontAwesomeIcon icon={faCompass} className="mr-2" />
               Descubrir Anime
             </Button>
           </Link>
-          <Link href="/search">
+          <Link href="/search" prefetch={true}>
             <Button size="lg" variant="outline">
               <FontAwesomeIcon icon={faMagnifyingGlass} className="mr-2" />
               Buscar
             </Button>
           </Link>
           {!loading && (
-            <Link href="/auth/signup">
+            <Link href="/auth/signup" prefetch={true}>
               <Button size="lg" variant="secondary">
                 <FontAwesomeIcon icon={faListCheck} className="mr-2" />
                 Crear Mi Lista
@@ -77,7 +85,9 @@ export default function HomePage() {
       {/* Barra de búsqueda */}
       <Section spacing="md" background="transparent" className="-mt-20">
         <Container>
-          <SearchBar />
+          <Suspense fallback={<div className="h-16 bg-card/50 rounded-xl animate-pulse" />}>
+            <LazySearchBar />
+          </Suspense>
         </Container>
       </Section>
 

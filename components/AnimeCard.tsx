@@ -38,7 +38,7 @@ function AnimeCard({ anime, index = 0, priority = false }: AnimeCardProps) {
       whileHover={{ y: -12 }}
       className="group relative h-full"
     >
-      <Link href={`/anime/${anime.mal_id}`} className="block h-full">
+      <Link href={`/anime/${anime.mal_id}`} prefetch={false} className="block h-full">
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#382059] to-[#2a1844] border-2 border-[#5a3d8f]/30 hover:border-[#CF50F2] transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-[#CF50F2]/40 h-full flex flex-col">
           {/* Imagen */}
           <div className="relative aspect-[2/3] overflow-hidden">
@@ -50,8 +50,6 @@ function AnimeCard({ anime, index = 0, priority = false }: AnimeCardProps) {
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 16vw"
               loading={priority ? 'eager' : 'lazy'}
               priority={priority}
-              placeholder="blur"
-              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
             />
             
             {/* Overlay con gradiente mejorado */}

@@ -108,16 +108,19 @@ export default function PerfilPage() {
 
   useEffect(() => {
     if (session?.user) {
-      fetchProfile()
-      if (activeTab === 'list') {
-        fetchMyList()
-      }
+      // Cargar perfil y lista en paralelo para mejor rendimiento
+      Promise.all([
+        fetchProfile(),
+        activeTab === 'list' ? fetchMyList() : Promise.resolve(),
+      ])
     }
   }, [session, statusFilter, activeTab])
 
   async function fetchProfile() {
     try {
-      const response = await fetch('/api/user/profile')
+      const response = await fetch('/api/user/profile', {
+        cache: 'no-store', // Evitar cache para datos actualizados
+      })
       const data = await response.json()
       if (data.success) {
         setProfile(data.user)
@@ -134,20 +137,28 @@ export default function PerfilPage() {
         ? '/api/anime-list' 
         : `/api/anime-list?status=${statusFilter}`
       
-      const response = await fetch(url)
+      const response = await fetch(url, {
+        cache: 'no-store', // Evitar cache para datos actualizados
+      })
       const data = await response.json()
 
       if (data.data) {
         setEntries(data.data)
         
-        // Fetch anime data for each entry
+        // Fetch anime data for each entry EN PARALELO para mejor rendimiento
+        const animePromises = data.data.map((entry: AnimeListEntry) =>
+          getAnimeById(entry.animeId).then(anime => ({ id: entry.animeId, anime }))
+        )
+        
+        const animeResults = await Promise.all(animePromises)
         const animeMap = new Map()
-        for (const entry of data.data) {
-          const anime = await getAnimeById(entry.animeId)
+        
+        animeResults.forEach(({ id, anime }) => {
           if (anime) {
-            animeMap.set(entry.animeId, anime)
+            animeMap.set(id, anime)
           }
-        }
+        })
+        
         setAnimeData(animeMap)
       }
     } catch (error) {
@@ -261,14 +272,23 @@ export default function PerfilPage() {
 
   if (sessionStatus === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#0D0D0D]">
         <Loading />
       </div>
     )
   }
 
-  if (!session || !profile) {
+  if (!session) {
     return null
+  }
+
+  // Mostrar loading solo si no tenemos perfil aún
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0D0D0D]">
+        <Loading />
+      </div>
+    )
   }
 
   return (
