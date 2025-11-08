@@ -18,6 +18,7 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  banner        String?   // Banner del perfil estilo Twitter/X
   password      String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

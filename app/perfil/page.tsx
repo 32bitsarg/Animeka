@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
   faUser, 
@@ -17,13 +17,19 @@ import {
   faPause,
   faXmark,
   faStar,
-  faChartLine
+  faChartLine,
+  faCamera,
+  faEdit,
+  faEye,
+  faEyeSlash
 } from '@fortawesome/free-solid-svg-icons'
 import AnimeCard from '@/components/AnimeCard'
 import Loading, { LoadingCard } from '@/components/Loading'
 import { Container, Section } from '@/components/ui'
 import { getAnimeById } from '@/lib/services/jikan'
 import type { Anime } from '@/lib/types/anime'
+import Image from 'next/image'
+import Link from 'next/link'
 
 interface AnimeListEntry {
   id: string
@@ -34,6 +40,35 @@ interface AnimeListEntry {
   isFavorite: boolean
   createdAt: string
   updatedAt: string
+}
+
+interface Recommendation {
+  id: string
+  animeId: number
+  animeTitle: string
+  animeImage: string | null
+  content: string
+  rating: number
+  spoilers: boolean
+  createdAt: string
+  _count: {
+    likes: number
+  }
+}
+
+interface UserProfile {
+  id: string
+  name: string | null
+  email: string | null
+  image: string | null
+  banner: string | null
+  createdAt: string
+  _count: {
+    animeList: number
+    recommendations: number
+    likes: number
+  }
+  recommendations: Recommendation[]
 }
 
 const STATUS_TABS = [
@@ -48,10 +83,17 @@ const STATUS_TABS = [
 export default function PerfilPage() {
   const { data: session, status: sessionStatus } = useSession()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState('all')
+  const [activeTab, setActiveTab] = useState<'list' | 'recommendations'>('list')
+  const [statusFilter, setStatusFilter] = useState('all')
   const [entries, setEntries] = useState<AnimeListEntry[]>([])
   const [animeData, setAnimeData] = useState<Map<number, Anime>>(new Map())
   const [loading, setLoading] = useState(true)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [editingBanner, setEditingBanner] = useState(false)
+  const [editingAvatar, setEditingAvatar] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const bannerInputRef = useRef<HTMLInputElement>(null)
+  const avatarInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (sessionStatus === 'unauthenticated') {
@@ -61,16 +103,31 @@ export default function PerfilPage() {
 
   useEffect(() => {
     if (session?.user) {
-      fetchMyList()
+      fetchProfile()
+      if (activeTab === 'list') {
+        fetchMyList()
+      }
     }
-  }, [session, activeTab])
+  }, [session, statusFilter, activeTab])
+
+  async function fetchProfile() {
+    try {
+      const response = await fetch('/api/user/profile')
+      const data = await response.json()
+      if (data.success) {
+        setProfile(data.user)
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error)
+    }
+  }
 
   async function fetchMyList() {
     setLoading(true)
     try {
-      const url = activeTab === 'all' 
+      const url = statusFilter === 'all' 
         ? '/api/anime-list' 
-        : `/api/anime-list?status=${activeTab}`
+        : `/api/anime-list?status=${statusFilter}`
       
       const response = await fetch(url)
       const data = await response.json()
@@ -95,6 +152,40 @@ export default function PerfilPage() {
     }
   }
 
+  async function handleImageUpload(file: File, type: 'avatar' | 'banner') {
+    if (!file) return
+
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('type', type)
+
+      const response = await fetch('/api/user/upload-image', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        await fetchProfile()
+        if (type === 'banner') {
+          setEditingBanner(false)
+        } else {
+          setEditingAvatar(false)
+        }
+      } else {
+        alert(data.error || 'Error al subir la imagen')
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      alert('Error al subir la imagen')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const stats = {
     total: entries.length,
     watching: entries.filter(e => e.status === 'WATCHING').length,
@@ -114,257 +205,402 @@ export default function PerfilPage() {
     )
   }
 
-  if (!session) {
+  if (!session || !profile) {
     return null
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section con info del usuario */}
-      <Section background="transparent" spacing="lg" className="pt-8">
-        <Container>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#382059] via-[#2a1844] to-[#1d0f30] border-2 border-[#CF50F2]/30 shadow-2xl shadow-[#CF50F2]/20 p-8 md:p-12"
-          >
-            {/* Decoración de fondo */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#CF50F2]/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#8552F2]/10 rounded-full blur-3xl" />
-            
-            <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-8">
-              {/* Avatar */}
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="relative"
-              >
-                <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-[#CF50F2] to-[#8552F2] flex items-center justify-center shadow-lg shadow-[#CF50F2]/50">
-                  <FontAwesomeIcon icon={faUser} className="text-white text-5xl" />
-                </div>
-                <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-[#10b981] border-4 border-[#382059] flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">✓</span>
-                </div>
-              </motion.div>
-
-              {/* Info del usuario */}
-              <div className="flex-1 text-center md:text-left">
-                <h1 className="text-4xl md:text-5xl font-poppins font-black text-transparent bg-clip-text bg-gradient-to-r from-[#CF50F2] via-[#AC79F2] to-[#8552F2] mb-3">
-                  {session.user?.name || 'Usuario'}
-                </h1>
-                
-                <div className="flex flex-wrap gap-4 justify-center md:justify-start text-foreground/70 mb-6">
-                  <div className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={faEnvelope} className="text-[#AC79F2]" />
-                    <span className="text-sm">{session.user?.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={faCalendar} className="text-[#AC79F2]" />
-                    <span className="text-sm">Miembro desde {new Date().getFullYear()}</span>
-                  </div>
-                </div>
-
-                {/* Mini stats */}
-                <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-                  <div className="px-4 py-2 rounded-full bg-[#CF50F2]/20 border border-[#CF50F2]/30">
-                    <span className="text-[#CF50F2] font-bold">{stats.total}</span>
-                    <span className="text-foreground/60 text-sm ml-2">Total</span>
-                  </div>
-                  <div className="px-4 py-2 rounded-full bg-[#10b981]/20 border border-[#10b981]/30">
-                    <span className="text-[#10b981] font-bold">{stats.completed}</span>
-                    <span className="text-foreground/60 text-sm ml-2">Completados</span>
-                  </div>
-                  <div className="px-4 py-2 rounded-full bg-[#8552F2]/20 border border-[#8552F2]/30">
-                    <span className="text-[#8552F2] font-bold">{stats.averageScore}</span>
-                    <span className="text-foreground/60 text-sm ml-2">Promedio</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </Container>
-      </Section>
-
-      {/* Estadísticas detalladas */}
-      <Section background="transparent" spacing="md">
-        <Container>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4"
-          >
-            <StatCard
-              icon={faTv}
-              label="Total"
-              value={stats.total}
-              color="#AC79F2"
+    <div className="min-h-screen bg-[#0D0D0D]">
+      {/* Banner y Avatar - Estilo Twitter/X */}
+      <div className="relative">
+        {/* Banner */}
+        <div className="relative h-64 bg-gradient-to-br from-[#382059] via-[#2a1844] to-[#1d0f30]">
+          {profile.banner ? (
+            <Image
+              src={profile.banner}
+              alt="Banner"
+              fill
+              className="object-cover"
             />
-            <StatCard
-              icon={faPlay}
-              label="Viendo"
-              value={stats.watching}
-              color="#10b981"
-            />
-            <StatCard
-              icon={faCheckCircle}
-              label="Completados"
-              value={stats.completed}
-              color="#CF50F2"
-            />
-            <StatCard
-              icon={faClock}
-              label="Por ver"
-              value={stats.planToWatch}
-              color="#8552F2"
-            />
-            <StatCard
-              icon={faHeart}
-              label="Favoritos"
-              value={stats.favorites}
-              color="#ef4444"
-            />
-            <StatCard
-              icon={faStar}
-              label="Promedio"
-              value={stats.averageScore}
-              color="#f59e0b"
-            />
-          </motion.div>
-        </Container>
-      </Section>
-
-      {/* Tabs de filtrado */}
-      <Section background="transparent" spacing="md">
-        <Container>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mb-8"
-          >
-            <h2 className="text-2xl md:text-3xl font-poppins font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#CF50F2] to-[#8552F2] mb-6">
-              Mi Colección
-            </h2>
-            
-            <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-hide">
-              {STATUS_TABS.map((tab) => (
-                <motion.button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap border-2 ${
-                    activeTab === tab.key
-                      ? 'bg-gradient-to-r from-[#CF50F2] to-[#8552F2] text-white shadow-lg shadow-[#CF50F2]/30 border-transparent'
-                      : 'bg-[#382059]/20 hover:bg-[#382059]/40 border-[#5a3d8f]/30'
-                  }`}
-                >
-                  <FontAwesomeIcon icon={tab.icon} className="mr-2" />
-                  {tab.label}
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Lista de anime */}
-          {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-              {[...Array(12)].map((_, i) => (
-                <LoadingCard key={i} />
-              ))}
-            </div>
-          ) : entries.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-              {entries.map((entry, index) => {
-                const anime = animeData.get(entry.animeId)
-                if (!anime) return null
-                return (
-                  <motion.div 
-                    key={entry.id} 
-                    className="relative"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <AnimeCard anime={anime} index={index} />
-                    <div className="mt-2 p-3 bg-gradient-to-br from-[#382059]/30 to-[#2a1844]/30 backdrop-blur-sm rounded-xl border border-[#5a3d8f]/30 text-sm">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-foreground/70">Progreso</span>
-                        <span className="font-bold text-[#CF50F2]">{entry.progress} eps</span>
-                      </div>
-                      {entry.score && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-foreground/70">Tu nota</span>
-                          <div className="flex items-center gap-1">
-                            <FontAwesomeIcon icon={faStar} className="text-yellow-400 text-xs" />
-                            <span className="font-bold text-[#8552F2]">{entry.score}/10</span>
-                          </div>
-                        </div>
-                      )}
-                      {entry.isFavorite && (
-                        <div className="mt-2 pt-2 border-t border-[#5a3d8f]/30 flex justify-center">
-                          <span className="text-xs text-[#ef4444] flex items-center gap-1">
-                            <FontAwesomeIcon icon={faHeart} />
-                            Favorito
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                )
-              })}
-            </div>
           ) : (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-20 bg-gradient-to-br from-[#382059]/20 to-[#2a1844]/20 backdrop-blur-sm rounded-3xl border-2 border-[#5a3d8f]/30"
-            >
-              <div className="text-8xl mb-6">📺</div>
-              <h3 className="text-3xl font-poppins font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#CF50F2] to-[#8552F2] mb-3">
-                Tu lista está vacía
-              </h3>
-              <p className="text-foreground/60 mb-8 text-lg">
-                Comienza a añadir animes para trackear tu progreso
-              </p>
+            <div className="w-full h-full bg-gradient-to-br from-[#382059] via-[#2a1844] to-[#1d0f30]" />
+          )}
+          
+          {/* Botón editar banner */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              setEditingBanner(true)
+              bannerInputRef.current?.click()
+            }}
+            className="absolute top-4 right-4 px-4 py-2 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white font-medium transition-all flex items-center gap-2"
+          >
+            <FontAwesomeIcon icon={faCamera} />
+            <span className="hidden sm:inline">Editar banner</span>
+          </motion.button>
+          <input
+            ref={bannerInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) {
+                handleImageUpload(file, 'banner')
+              }
+            }}
+          />
+        </div>
+
+        {/* Avatar - Posicionado sobre el banner */}
+        <Container>
+          <div className="relative -mt-20 mb-4">
+            <div className="relative inline-block">
+              <div className="relative w-32 h-32 rounded-full border-4 border-[#0D0D0D] overflow-hidden bg-gradient-to-br from-[#CF50F2] to-[#8552F2]">
+                {profile.image ? (
+                  <Image
+                    src={profile.image}
+                    alt={profile.name || 'Usuario'}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <FontAwesomeIcon icon={faUser} className="text-white text-5xl" />
+                  </div>
+                )}
+              </div>
+              
+              {/* Botón editar avatar */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => router.push('/discover')}
-                className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#CF50F2] to-[#8552F2] text-white font-bold shadow-lg shadow-[#CF50F2]/30"
+                onClick={() => {
+                  setEditingAvatar(true)
+                  avatarInputRef.current?.click()
+                }}
+                className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-[#CF50F2] hover:bg-[#8552F2] border-4 border-[#0D0D0D] flex items-center justify-center text-white transition-all shadow-lg"
               >
-                <FontAwesomeIcon icon={faChartLine} className="mr-2" />
-                Descubrir Anime
+                <FontAwesomeIcon icon={faCamera} className="text-sm" />
               </motion.button>
-            </motion.div>
-          )}
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    handleImageUpload(file, 'avatar')
+                  }
+                }}
+              />
+            </div>
+          </div>
         </Container>
-      </Section>
+      </div>
+
+      {/* Info del usuario */}
+      <Container>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <h1 className="text-3xl font-poppins font-black text-transparent bg-clip-text bg-gradient-to-r from-[#CF50F2] via-[#AC79F2] to-[#8552F2] mb-2">
+            {profile.name || 'Usuario'}
+          </h1>
+          
+          <div className="flex flex-wrap gap-4 text-foreground/70 mb-6">
+            <div className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faEnvelope} className="text-[#AC79F2]" />
+              <span className="text-sm">{profile.email}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faCalendar} className="text-[#AC79F2]" />
+              <span className="text-sm">
+                Miembro desde {new Date(profile.createdAt).getFullYear()}
+              </span>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="flex gap-6 mb-6">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-[#CF50F2]">{profile._count.animeList}</div>
+              <div className="text-sm text-foreground/60">Animes</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-[#CF50F2]">{profile._count.recommendations}</div>
+              <div className="text-sm text-foreground/60">Recomendaciones</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-[#CF50F2]">{profile._count.likes}</div>
+              <div className="text-sm text-foreground/60">Likes dados</div>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex gap-4 border-b border-[#5a3d8f]/30">
+            <button
+              onClick={() => setActiveTab('list')}
+              className={`px-6 py-3 font-medium transition-all border-b-2 ${
+                activeTab === 'list'
+                  ? 'border-[#CF50F2] text-[#CF50F2]'
+                  : 'border-transparent text-foreground/60 hover:text-foreground'
+              }`}
+            >
+              <FontAwesomeIcon icon={faTv} className="mr-2" />
+              Mi Lista
+            </button>
+            <button
+              onClick={() => setActiveTab('recommendations')}
+              className={`px-6 py-3 font-medium transition-all border-b-2 ${
+                activeTab === 'recommendations'
+                  ? 'border-[#CF50F2] text-[#CF50F2]'
+                  : 'border-transparent text-foreground/60 hover:text-foreground'
+              }`}
+            >
+              <FontAwesomeIcon icon={faStar} className="mr-2" />
+              Mis Recomendaciones ({profile.recommendations.length})
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Contenido según tab activo */}
+        {activeTab === 'list' ? (
+          <>
+            {/* Tabs de filtrado */}
+            <div className="mb-8">
+              <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-hide">
+                {STATUS_TABS.map((tab) => (
+                  <motion.button
+                    key={tab.key}
+                    onClick={() => setStatusFilter(tab.key)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap border-2 ${
+                      statusFilter === tab.key
+                        ? 'bg-gradient-to-r from-[#CF50F2] to-[#8552F2] text-white shadow-lg shadow-[#CF50F2]/30 border-transparent'
+                        : 'bg-[#382059]/20 hover:bg-[#382059]/40 border-[#5a3d8f]/30'
+                    }`}
+                  >
+                    <FontAwesomeIcon icon={tab.icon} className="mr-2" />
+                    {tab.label}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+
+            {/* Lista de anime */}
+            {loading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+                {[...Array(12)].map((_, i) => (
+                  <LoadingCard key={i} />
+                ))}
+              </div>
+            ) : entries.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+                {entries.map((entry, index) => {
+                  const anime = animeData.get(entry.animeId)
+                  if (!anime) return null
+                  return (
+                    <motion.div 
+                      key={entry.id} 
+                      className="relative"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <AnimeCard anime={anime} index={index} />
+                      <div className="mt-2 p-3 bg-gradient-to-br from-[#382059]/30 to-[#2a1844]/30 backdrop-blur-sm rounded-xl border border-[#5a3d8f]/30 text-sm">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-foreground/70">Progreso</span>
+                          <span className="font-bold text-[#CF50F2]">{entry.progress} eps</span>
+                        </div>
+                        {entry.score && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-foreground/70">Tu nota</span>
+                            <div className="flex items-center gap-1">
+                              <FontAwesomeIcon icon={faStar} className="text-yellow-400 text-xs" />
+                              <span className="font-bold text-[#8552F2]">{entry.score}/10</span>
+                            </div>
+                          </div>
+                        )}
+                        {entry.isFavorite && (
+                          <div className="mt-2 pt-2 border-t border-[#5a3d8f]/30 flex justify-center">
+                            <span className="text-xs text-[#ef4444] flex items-center gap-1">
+                              <FontAwesomeIcon icon={faHeart} />
+                              Favorito
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-20 bg-gradient-to-br from-[#382059]/20 to-[#2a1844]/20 backdrop-blur-sm rounded-3xl border-2 border-[#5a3d8f]/30"
+              >
+                <div className="text-8xl mb-6">📺</div>
+                <h3 className="text-3xl font-poppins font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#CF50F2] to-[#8552F2] mb-3">
+                  Tu lista está vacía
+                </h3>
+                <p className="text-foreground/60 mb-8 text-lg">
+                  Comienza a añadir animes para trackear tu progreso
+                </p>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => router.push('/discover')}
+                  className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#CF50F2] to-[#8552F2] text-white font-bold shadow-lg shadow-[#CF50F2]/30"
+                >
+                  <FontAwesomeIcon icon={faChartLine} className="mr-2" />
+                  Descubrir Anime
+                </motion.button>
+              </motion.div>
+            )}
+          </>
+        ) : (
+          /* Sección de Recomendaciones */
+          <div className="space-y-4">
+            {profile.recommendations.length > 0 ? (
+              profile.recommendations.map((rec, index) => (
+                <RecommendationCard key={rec.id} recommendation={rec} index={index} />
+              ))
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-20 bg-gradient-to-br from-[#382059]/20 to-[#2a1844]/20 backdrop-blur-sm rounded-3xl border-2 border-[#5a3d8f]/30"
+              >
+                <div className="text-8xl mb-6">💬</div>
+                <h3 className="text-3xl font-poppins font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#CF50F2] to-[#8552F2] mb-3">
+                  Aún no has recomendado ningún anime
+                </h3>
+                <p className="text-foreground/60 mb-8 text-lg">
+                  Comparte tus animes favoritos con la comunidad
+                </p>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => router.push('/recomendar')}
+                  className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#CF50F2] to-[#8552F2] text-white font-bold shadow-lg shadow-[#CF50F2]/30"
+                >
+                  <FontAwesomeIcon icon={faStar} className="mr-2" />
+                  Crear Recomendación
+                </motion.button>
+              </motion.div>
+            )}
+          </div>
+        )}
+      </Container>
+
+      {/* Loading overlay para uploads */}
+      <AnimatePresence>
+        {uploading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          >
+            <div className="text-center">
+              <div className="animate-spin w-12 h-12 border-4 border-[#CF50F2] border-t-transparent rounded-full mx-auto mb-4" />
+              <p className="text-white font-medium">Subiendo imagen...</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
 
-function StatCard({ icon, label, value, color }: { icon: any; label: string; value: number | string; color: string }) {
+function RecommendationCard({ recommendation, index }: { recommendation: Recommendation; index: number }) {
+  const [showSpoilers, setShowSpoilers] = useState(false)
+
   return (
     <motion.div
-      whileHover={{ scale: 1.05, y: -5 }}
-      className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#382059]/40 to-[#2a1844]/40 backdrop-blur-sm p-6 text-center border-2 border-[#5a3d8f]/30 hover:border-[#CF50F2]/50 transition-all shadow-lg hover:shadow-2xl hover:shadow-[#CF50F2]/20"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className="bg-gradient-to-br from-[#382059]/40 to-[#2a1844]/40 backdrop-blur-sm rounded-2xl border border-[#5a3d8f]/30 shadow-lg overflow-hidden"
     >
-      <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#CF50F2]/10 to-transparent rounded-full blur-2xl" />
-      
-      <div className="relative z-10">
-        <div 
-          className="w-12 h-12 mx-auto mb-3 rounded-xl flex items-center justify-center"
-          style={{ backgroundColor: `${color}20`, border: `2px solid ${color}40` }}
-        >
-          <FontAwesomeIcon icon={icon} style={{ color }} className="text-xl" />
+      <div className="p-4">
+        {/* Anime Info */}
+        {recommendation.animeTitle && recommendation.animeTitle !== 'Opinión General' && (
+          <Link href={`/anime/${recommendation.animeId}`}>
+            <div className="mb-3 p-3 rounded-xl bg-[#382059]/20 hover:bg-[#382059]/30 transition-colors border border-[#5a3d8f]/20">
+              <div className="flex gap-3">
+                {recommendation.animeImage && (
+                  <div className="relative w-20 h-28 rounded-lg overflow-hidden flex-shrink-0">
+                    <Image
+                      src={recommendation.animeImage}
+                      alt={recommendation.animeTitle}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-[#CF50F2] line-clamp-2 mb-1">
+                    {recommendation.animeTitle}
+                  </h3>
+                  {recommendation.rating > 0 && (
+                    <div className="flex items-center gap-1">
+                      <FontAwesomeIcon icon={faStar} className="text-yellow-400 text-xs" />
+                      <span className="text-sm text-foreground/70">{recommendation.rating.toFixed(1)}/10</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </Link>
+        )}
+
+        {/* Contenido */}
+        <div className="mb-3">
+          {recommendation.spoilers && !showSpoilers ? (
+            <button
+              onClick={() => setShowSpoilers(true)}
+              className="w-full px-4 py-3 rounded-lg bg-[#382059]/30 border border-[#5a3d8f]/50 text-foreground/70 hover:bg-[#382059]/50 transition-all flex items-center justify-center gap-2"
+            >
+              <FontAwesomeIcon icon={faEyeSlash} />
+              <span>Contiene Spoilers - Click para ver</span>
+            </button>
+          ) : (
+            <p className="text-foreground/90 leading-relaxed whitespace-pre-wrap">
+              {recommendation.content}
+            </p>
+          )}
         </div>
-        <div className="text-3xl font-black mb-1" style={{ color }}>
-          {value}
+
+        {recommendation.spoilers && showSpoilers && (
+          <div className="mb-3 px-3 py-1 rounded-full bg-[#f59e0b]/20 text-[#f59e0b] text-xs font-semibold inline-block">
+            ⚠️ Spoilers
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-3 border-t border-[#5a3d8f]/30">
+          <div className="flex items-center gap-2 text-sm text-foreground/60">
+            <FontAwesomeIcon icon={faHeart} className="text-red-400" />
+            <span>{recommendation._count.likes} me gusta</span>
+          </div>
+          <div className="text-xs text-foreground/60">
+            {new Date(recommendation.createdAt).toLocaleDateString('es-ES', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
+          </div>
         </div>
-        <div className="text-sm text-foreground/60 font-medium">{label}</div>
       </div>
     </motion.div>
   )
 }
-

@@ -21,9 +21,18 @@ import {
 import { Container, Section } from '@/components/ui'
 import Image from 'next/image'
 import Link from 'next/link'
-import { getTopRatedAnime } from '@/lib/services/jikan'
-import type { Anime } from '@/lib/types/anime'
 import AnimeCard from '@/components/AnimeCard'
+
+interface PopularAnime {
+  animeId: number
+  animeTitle: string
+  animeImage: string | null
+  totalRecommendations: number
+  totalLikes: number
+  averageRating: number
+  totalScore: number
+  rank: number
+}
 
 interface Recommendation {
   id: string
@@ -62,7 +71,7 @@ export default function RecomendarPage() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showOpinionModal, setShowOpinionModal] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-  const [topAnimes, setTopAnimes] = useState<Anime[]>([])
+  const [topAnimes, setTopAnimes] = useState<PopularAnime[]>([])
 
   useEffect(() => {
     if (session?.user?.email) {
@@ -87,18 +96,20 @@ export default function RecomendarPage() {
     fetchRecommendations()
   }, [activeFilter])
 
-  useEffect(() => {
-    // Cargar top animes para el sidebar
-    async function fetchTopAnimes() {
-      try {
-        const data = await getTopRatedAnime(1, 10)
-        if (data?.data) {
-          setTopAnimes(data.data.filter(anime => anime.type === 'TV').slice(0, 10))
-        }
-      } catch (error) {
-        console.error('Error fetching top animes:', error)
+  async function fetchTopAnimes() {
+    try {
+      const response = await fetch('/api/recommendations/popular-animes?limit=10')
+      const data = await response.json()
+      if (data.success) {
+        setTopAnimes(data.data)
       }
+    } catch (error) {
+      console.error('Error fetching popular animes:', error)
     }
+  }
+
+  useEffect(() => {
+    // Cargar top animes populares basados en recomendaciones de usuarios
     fetchTopAnimes()
   }, [])
 
@@ -125,6 +136,7 @@ export default function RecomendarPage() {
       const data = await response.json()
       if (data.success) {
         fetchRecommendations()
+        fetchTopAnimes() // Recargar animes populares cuando se da un like
       }
     } catch (error) {
       console.error('Error toggling like:', error)
@@ -294,45 +306,61 @@ export default function RecomendarPage() {
                 <div className="flex items-center gap-2 mb-6">
                   <FontAwesomeIcon icon={faTrophy} className="text-yellow-400 text-xl" />
                   <h2 className="text-xl font-poppins font-bold text-foreground">
-                    Top 10 Animes
+                    Más Populares
                   </h2>
                 </div>
                 <div className="space-y-3">
                   {topAnimes.length > 0 ? (
-                    topAnimes.map((anime, index) => (
+                    topAnimes.map((anime) => (
                       <Link
-                        key={anime.mal_id}
-                        href={`/anime/${anime.mal_id}`}
+                        key={anime.animeId}
+                        href={`/anime/${anime.animeId}`}
                         className="flex gap-3 p-3 rounded-xl hover:bg-[#382059]/30 transition-all group"
                       >
-                        <div className="relative w-16 h-24 flex-shrink-0 rounded-lg overflow-hidden">
-                          <Image
-                            src={anime.images.webp.large_image_url || anime.images.jpg.large_image_url}
-                            alt={anime.title}
-                            fill
-                            className="object-cover group-hover:scale-110 transition-transform"
-                          />
+                        <div className="relative w-16 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-[#382059]/20">
+                          {anime.animeImage ? (
+                            <Image
+                              src={anime.animeImage}
+                              alt={anime.animeTitle}
+                              fill
+                              className="object-cover group-hover:scale-110 transition-transform"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#382059] to-[#2a1844]">
+                              <FontAwesomeIcon icon={faStar} className="text-[#CF50F2]/50 text-xl" />
+                            </div>
+                          )}
                           <div className="absolute top-1 left-1 w-6 h-6 rounded-full bg-gradient-to-r from-[#CF50F2] to-[#8552F2] flex items-center justify-center text-white text-xs font-bold">
-                            {index + 1}
+                            {anime.rank}
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-[#CF50F2] transition-colors">
-                            {anime.title}
+                            {anime.animeTitle}
                           </h3>
-                          {anime.score && (
-                            <div className="flex items-center gap-1 mt-1 text-xs text-foreground/60">
-                              <FontAwesomeIcon icon={faStar} className="text-yellow-400" />
-                              <span>{anime.score}</span>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-foreground/60">
+                            {anime.averageRating > 0 && (
+                              <div className="flex items-center gap-1">
+                                <FontAwesomeIcon icon={faStar} className="text-yellow-400" />
+                                <span>{anime.averageRating.toFixed(1)}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <FontAwesomeIcon icon={faHeart} className="text-red-400" />
+                              <span>{anime.totalLikes}</span>
                             </div>
-                          )}
+                            <div className="flex items-center gap-1">
+                              <FontAwesomeIcon icon={faUser} className="text-blue-400" />
+                              <span>{anime.totalRecommendations}</span>
+                            </div>
+                          </div>
                         </div>
                       </Link>
                     ))
                   ) : (
                     <div className="text-center py-8 text-foreground/60">
                       <div className="animate-spin w-8 h-8 border-2 border-[#CF50F2] border-t-transparent rounded-full mx-auto mb-2" />
-                      <p className="text-sm">Cargando...</p>
+                      <p className="text-sm">Cargando animes populares...</p>
                     </div>
                   )}
                 </div>
@@ -349,6 +377,7 @@ export default function RecomendarPage() {
           onSuccess={() => {
             setShowCreateModal(false)
             fetchRecommendations()
+            fetchTopAnimes() // Recargar animes populares cuando se crea una recomendación
           }}
         />
       )}
@@ -360,6 +389,7 @@ export default function RecomendarPage() {
           onSuccess={() => {
             setShowOpinionModal(false)
             fetchRecommendations()
+            // No recargar animes populares para opiniones generales (no tienen animeId)
           }}
         />
       )}

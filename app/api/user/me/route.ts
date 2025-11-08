@@ -21,6 +21,7 @@ export async function GET() {
         name: true,
         email: true,
         image: true,
+        banner: true,
         createdAt: true,
       },
     })
