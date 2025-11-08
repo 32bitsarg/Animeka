@@ -30,6 +30,7 @@ import { getAnimeById } from '@/lib/services/jikan'
 import type { Anime } from '@/lib/types/anime'
 import Image from 'next/image'
 import Link from 'next/link'
+import ImageCropModal from '@/components/ImageCropModal'
 
 interface AnimeListEntry {
   id: string
@@ -92,6 +93,10 @@ export default function PerfilPage() {
   const [editingBanner, setEditingBanner] = useState(false)
   const [editingAvatar, setEditingAvatar] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [cropModalOpen, setCropModalOpen] = useState(false)
+  const [cropImageSrc, setCropImageSrc] = useState<string>('')
+  const [cropType, setCropType] = useState<'avatar' | 'banner'>('avatar')
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
   const bannerInputRef = useRef<HTMLInputElement>(null)
   const avatarInputRef = useRef<HTMLInputElement>(null)
 
@@ -152,32 +157,56 @@ export default function PerfilPage() {
     }
   }
 
-  async function handleImageUpload(file: File, type: 'avatar' | 'banner') {
+  function handleFileSelect(file: File, type: 'avatar' | 'banner') {
     if (!file) return
 
+    // Crear una URL temporal para la imagen
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const imageSrc = e.target?.result as string
+      setCropImageSrc(imageSrc)
+      setCropType(type)
+      setPendingFile(file)
+      setCropModalOpen(true)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  async function handleCropComplete(croppedImageDataUrl: string) {
+    if (!pendingFile) return
+
+    setCropModalOpen(false)
     setUploading(true)
+
     try {
+      // Convertir data URL a File
+      const response = await fetch(croppedImageDataUrl)
+      const blob = await response.blob()
+      const file = new File([blob], pendingFile.name, {
+        type: 'image/jpeg',
+        lastModified: Date.now(),
+      })
+
+      // Subir la imagen recortada
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('type', type)
+      formData.append('type', cropType)
 
-      const response = await fetch('/api/user/upload-image', {
+      const uploadResponse = await fetch('/api/user/upload-image', {
         method: 'POST',
         body: formData,
       })
 
-      const data = await response.json()
+      const data = await uploadResponse.json()
 
       if (data.success) {
         await fetchProfile()
         // Disparar evento para actualizar el Navbar
-        if (type === 'avatar') {
+        if (cropType === 'avatar') {
           window.dispatchEvent(new CustomEvent('userImageUpdated'))
-        }
-        if (type === 'banner') {
-          setEditingBanner(false)
-        } else {
           setEditingAvatar(false)
+        } else {
+          setEditingBanner(false)
         }
       } else {
         alert(data.error || 'Error al subir la imagen')
@@ -187,7 +216,13 @@ export default function PerfilPage() {
       alert('Error al subir la imagen')
     } finally {
       setUploading(false)
+      setPendingFile(null)
     }
+  }
+
+  async function handleImageUpload(file: File, type: 'avatar' | 'banner') {
+    // Esta función ahora solo abre el modal de recorte
+    handleFileSelect(file, type)
   }
 
   const stats = {
@@ -259,8 +294,10 @@ export default function PerfilPage() {
             onChange={(e) => {
               const file = e.target.files?.[0]
               if (file) {
-                handleImageUpload(file, 'banner')
+                handleFileSelect(file, 'banner')
               }
+              // Resetear el input para permitir seleccionar el mismo archivo de nuevo
+              e.target.value = ''
             }}
           />
         </div>
@@ -312,8 +349,10 @@ export default function PerfilPage() {
                 onChange={(e) => {
                   const file = e.target.files?.[0]
                   if (file) {
-                    handleImageUpload(file, 'avatar')
+                    handleFileSelect(file, 'avatar')
                   }
+                  // Resetear el input para permitir seleccionar el mismo archivo de nuevo
+                  e.target.value = ''
                 }}
               />
             </div>
@@ -537,6 +576,19 @@ export default function PerfilPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Modal de recorte de imagen */}
+      <ImageCropModal
+        isOpen={cropModalOpen}
+        imageSrc={cropImageSrc}
+        onClose={() => {
+          setCropModalOpen(false)
+          setPendingFile(null)
+        }}
+        onCropComplete={handleCropComplete}
+        type={cropType}
+        aspectRatio={cropType === 'avatar' ? 1 : 3}
+      />
     </div>
   )
 }

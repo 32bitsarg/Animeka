@@ -64,13 +64,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validar tamaño
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { success: false, error: 'El archivo es demasiado grande. Máximo 5MB' },
-        { status: 400 }
-      )
-    }
+    // No rechazamos por tamaño, simplemente comprimiremos más agresivamente
 
     // Validar que sea realmente una imagen (magic bytes)
     const arrayBuffer = await file.arrayBuffer()
@@ -90,17 +84,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Optimizar y redimensionar imagen antes de convertir a base64
-    // Para evitar problemas con imágenes muy grandes en base64
+    // Comprimimos automáticamente sin importar el tamaño original
     let optimizedBuffer: Buffer = buffer
     let optimizedType = file.type
 
-    // Intentar usar sharp si está disponible, sino usar canvas nativo o simplemente limitar tamaño
+    // Intentar usar sharp si está disponible para comprimir agresivamente
     try {
       const sharp = await import('sharp')
       
-      const maxWidth = type === 'avatar' ? 200 : 1200  // Reducir más para base64
+      // Dimensiones más pequeñas para mantener base64 manejable
+      const maxWidth = type === 'avatar' ? 200 : 1200
       const maxHeight = type === 'avatar' ? 200 : 400
-      const quality = type === 'avatar' ? 75 : 70  // Calidad más baja para base64
+      
+      // Calidad ajustable según el tamaño original
+      let quality = type === 'avatar' ? 75 : 70
+      if (buffer.length > 2000000) { // Si es mayor a 2MB, comprimir más
+        quality = type === 'avatar' ? 60 : 55
+      } else if (buffer.length > 1000000) { // Si es mayor a 1MB
+        quality = type === 'avatar' ? 65 : 60
+      }
 
       const sharpInstance = sharp.default(buffer as Buffer)
       optimizedBuffer = await sharpInstance
@@ -112,13 +114,29 @@ export async function POST(request: NextRequest) {
         .toBuffer() as Buffer
       
       optimizedType = 'image/jpeg'
-      console.log(`✅ Imagen optimizada: ${file.size} bytes -> ${optimizedBuffer.length} bytes`)
+      console.log(`✅ Imagen optimizada: ${file.size} bytes -> ${optimizedBuffer.length} bytes (calidad: ${quality}%)`)
+      
+      // Si después de optimizar sigue siendo muy grande, comprimir más agresivamente
+      let attempts = 0
+      while (optimizedBuffer.length > 40000 && attempts < 3) { // Intentar mantener bajo 40KB
+        quality = Math.max(30, quality - 10) // Reducir calidad en 10%, mínimo 30%
+        optimizedBuffer = await sharpInstance
+          .resize(maxWidth, maxHeight, {
+            fit: 'inside',
+            withoutEnlargement: true,
+          })
+          .jpeg({ quality, mozjpeg: true })
+          .toBuffer() as Buffer
+        attempts++
+        console.log(`🔄 Re-compresión intento ${attempts}: ${optimizedBuffer.length} bytes (calidad: ${quality}%)`)
+      }
     } catch (sharpError) {
-      // Si sharp no está disponible, usar el buffer original pero validar tamaño
+      // Si sharp no está disponible, intentar comprimir con canvas o limitar
       console.warn('⚠️ Sharp no disponible, usando imagen original:', sharpError)
-      if (buffer.length > 500000) { // Si la imagen es mayor a 500KB sin optimizar
+      // Si la imagen es muy grande sin sharp, rechazarla
+      if (buffer.length > 1000000) { // 1MB sin optimizar
         return NextResponse.json(
-          { success: false, error: 'La imagen es demasiado grande. Por favor, usa una imagen más pequeña (máximo 500KB).' },
+          { success: false, error: 'La imagen es demasiado grande. Por favor, intenta con una imagen más pequeña.' },
           { status: 400 }
         )
       }
@@ -129,10 +147,11 @@ export async function POST(request: NextRequest) {
     const dataUrl = `data:${optimizedType};base64,${base64}`
     
     // Verificar que la data URL no sea demasiado larga
-    // MySQL TEXT puede almacenar hasta 65KB, pero para evitar problemas usamos 50KB
-    if (dataUrl.length > 50000) {
+    // MySQL TEXT puede almacenar hasta 65KB, pero para evitar problemas usamos 60KB
+    // Si aún es muy grande después de todas las optimizaciones, rechazarla
+    if (dataUrl.length > 60000) {
       return NextResponse.json(
-        { success: false, error: 'La imagen es demasiado grande. Por favor, usa una imagen más pequeña.' },
+        { success: false, error: 'La imagen es demasiado grande incluso después de comprimirla. Por favor, intenta con una imagen más pequeña o de menor resolución.' },
         { status: 400 }
       )
     }
