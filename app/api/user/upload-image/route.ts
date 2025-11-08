@@ -89,9 +89,54 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Convertir a base64 para almacenar (en producción, usarías un servicio como Cloudinary, S3, etc.)
-    const base64 = buffer.toString('base64')
-    const dataUrl = `data:${file.type};base64,${base64}`
+    // Optimizar y redimensionar imagen antes de convertir a base64
+    // Para evitar problemas con imágenes muy grandes en base64
+    let optimizedBuffer = buffer
+    let optimizedType = file.type
+
+    // Intentar usar sharp si está disponible, sino usar canvas nativo o simplemente limitar tamaño
+    try {
+      const sharp = await import('sharp')
+      
+      const maxWidth = type === 'avatar' ? 200 : 1200  // Reducir más para base64
+      const maxHeight = type === 'avatar' ? 200 : 400
+      const quality = type === 'avatar' ? 75 : 70  // Calidad más baja para base64
+
+      optimizedBuffer = await sharp.default(buffer)
+        .resize(maxWidth, maxHeight, {
+          fit: 'inside',
+          withoutEnlargement: true,
+        })
+        .jpeg({ quality, mozjpeg: true })
+        .toBuffer()
+      
+      optimizedType = 'image/jpeg'
+      console.log(`✅ Imagen optimizada: ${file.size} bytes -> ${optimizedBuffer.length} bytes`)
+    } catch (sharpError) {
+      // Si sharp no está disponible, usar el buffer original pero validar tamaño
+      console.warn('⚠️ Sharp no disponible, usando imagen original')
+      if (buffer.length > 500000) { // Si la imagen es mayor a 500KB sin optimizar
+        return NextResponse.json(
+          { success: false, error: 'La imagen es demasiado grande. Por favor, usa una imagen más pequeña (máximo 500KB).' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Convertir a base64 para almacenar
+    const base64 = optimizedBuffer.toString('base64')
+    const dataUrl = `data:${optimizedType};base64,${base64}`
+    
+    // Verificar que la data URL no sea demasiado larga
+    // MySQL TEXT puede almacenar hasta 65KB, pero para evitar problemas usamos 50KB
+    if (dataUrl.length > 50000) {
+      return NextResponse.json(
+        { success: false, error: 'La imagen es demasiado grande. Por favor, usa una imagen más pequeña.' },
+        { status: 400 }
+      )
+    }
+    
+    console.log(`📏 Tamaño de data URL: ${dataUrl.length} caracteres`)
 
     // Actualizar usuario en la base de datos
     const user = await prisma.user.findUnique({
