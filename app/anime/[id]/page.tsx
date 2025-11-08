@@ -249,9 +249,43 @@ export default function AnimeDetailPage({ params }: PageProps) {
         <div className="container mx-auto px-4 py-8">
           <h2 className="text-3xl font-bold mb-6">Recomendaciones</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {recommendations.map((rec, index) => (
-              <AnimeCard key={rec.entry.mal_id} anime={rec.entry as any} index={index} />
-            ))}
+            {recommendations.map((rec, index) => {
+              // Convertir AnimeRecommendation.entry a Anime parcial
+              const animeData: Anime = {
+                ...rec.entry,
+                trailer: { youtube_id: null, url: null, embed_url: null },
+                approved: true,
+                titles: [{ type: 'Default', title: rec.entry.title }],
+                title_english: null,
+                title_japanese: null,
+                type: null,
+                source: null,
+                episodes: null,
+                status: null,
+                airing: false,
+                aired: { from: null, to: null, string: '' },
+                duration: null,
+                rating: null,
+                score: null,
+                scored_by: null,
+                rank: null,
+                popularity: null,
+                members: null,
+                favorites: null,
+                synopsis: null,
+                background: null,
+                season: null,
+                year: null,
+                broadcast: { day: null, time: null, timezone: null, string: null },
+                producers: [],
+                licensors: [],
+                studios: [],
+                genres: [],
+                themes: [],
+                demographics: [],
+              }
+              return <AnimeCard key={rec.entry.mal_id} anime={animeData} index={index} />
+            })}
           </div>
         </div>
       )}

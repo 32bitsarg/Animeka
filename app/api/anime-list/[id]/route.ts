@@ -28,11 +28,19 @@ export async function PUT(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: 'No encontrado' }, { status: 404 })
     }
 
-    const updateData: any = {}
+    const updateData: {
+      status?: string
+      score?: number | null
+      progress?: number
+      notes?: string | null
+      isFavorite?: boolean
+      startedAt?: Date
+      completedAt?: Date
+    } = {}
 
     if (status !== undefined) updateData.status = status
-    if (score !== undefined) updateData.score = score ? parseFloat(score) : null
-    if (progress !== undefined) updateData.progress = parseInt(progress)
+    if (score !== undefined) updateData.score = score ? (typeof score === 'string' ? parseFloat(score) : score) : null
+    if (progress !== undefined) updateData.progress = typeof progress === 'string' ? parseInt(progress, 10) : progress
     if (notes !== undefined) updateData.notes = notes
     if (isFavorite !== undefined) updateData.isFavorite = isFavorite
 

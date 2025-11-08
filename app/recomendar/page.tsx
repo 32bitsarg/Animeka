@@ -346,7 +346,7 @@ function RecommendationCard({
   )
 }
 
-function CreateRecommendationModal({
+export function CreateRecommendationModal({
   onClose,
   onSuccess,
 }: {
