@@ -38,13 +38,14 @@ export default function AnimeDetailPage({ params }: PageProps) {
           setAnime(animeData)
           // Traducir la sinopsis automáticamente
           if (animeData.synopsis) {
-            console.log('📖 Original synopsis:', animeData.synopsis.substring(0, 50) + '...')
-            translateToSpanish(animeData.synopsis).then(translated => {
+            const synopsis = animeData.synopsis // Guardar en variable para TypeScript
+            console.log('📖 Original synopsis:', synopsis.substring(0, 50) + '...')
+            translateToSpanish(synopsis).then(translated => {
               console.log('✅ Translated synopsis:', translated.substring(0, 50) + '...')
               setTranslatedSynopsis(translated)
             }).catch(err => {
               console.error('❌ Translation failed:', err)
-              setTranslatedSynopsis(animeData.synopsis)
+              setTranslatedSynopsis(synopsis ?? '') // Usar la variable local con fallback
             })
           }
         }
