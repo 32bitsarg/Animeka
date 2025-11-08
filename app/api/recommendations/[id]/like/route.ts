@@ -7,7 +7,7 @@ import { checkRateLimit, rateLimits } from '@/lib/rate-limit'
 // POST - Dar/Quitar like a una recomendación
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -45,7 +45,9 @@ export async function POST(
       )
     }
 
-    const recommendationId = params.id
+    // En Next.js 16, params es una Promise
+    const { id } = await params
+    const recommendationId = id
 
     // Validar formato de ID
     if (!recommendationId || recommendationId.trim() === '') {
