@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMagnifyingGlass, faArrowRight, faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faMagnifyingGlass, faArrowRight } from '@fortawesome/free-solid-svg-icons'
 
 interface SearchBarProps {
   onSearch?: (query: string) => void
@@ -66,7 +66,7 @@ export default function SearchBar({
             placeholder={placeholder}
             autoFocus={autoFocus}
             className="
-              w-full pl-16 pr-40 py-5 
+              w-full pl-16 pr-[140px] py-5 
               rounded-2xl
               bg-card/90 backdrop-blur-md
               border-2 border-border
@@ -80,20 +80,7 @@ export default function SearchBar({
             "
           />
 
-          {/* Botón limpiar */}
-          {query && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              type="button"
-              onClick={() => setQuery('')}
-              className="absolute right-36 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors"
-            >
-              <FontAwesomeIcon icon={faXmark} size="lg" />
-            </motion.button>
-          )}
-
-          {/* Botón de buscar mejorado */}
+          {/* Botón de buscar mejorado - posición fija */}
           <motion.button
             type="submit"
             whileHover={{ scale: 1.05 }}
@@ -106,9 +93,10 @@ export default function SearchBar({
               gradient-primary
               text-white font-poppins font-semibold
               flex items-center space-x-2
-              transition-all duration-300
+              transition-opacity duration-300
               ${query.trim() ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}
               hover:shadow-lg hover:shadow-primary/50
+              z-20
             `}
           >
             <span>Buscar</span>

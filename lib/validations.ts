@@ -40,12 +40,13 @@ export const signinSchema = z.object({
 
 // Schema para recomendaciones
 export const recommendationSchema = z.object({
-  animeId: z.number().int().positive('ID de anime inválido'),
+  animeId: z.number().int().positive('ID de anime inválido').optional(),
   animeTitle: z
     .string()
     .min(1, 'Título requerido')
     .max(500, 'Título demasiado largo')
-    .trim(),
+    .trim()
+    .optional(),
   animeImage: z
     .string()
     .url('URL de imagen inválida')
@@ -54,13 +55,15 @@ export const recommendationSchema = z.object({
     .optional(),
   content: z
     .string()
-    .min(50, 'La reseña debe tener al menos 50 caracteres')
-    .max(5000, 'La reseña no puede superar los 5000 caracteres')
+    .min(20, 'El contenido debe tener al menos 20 caracteres')
+    .max(5000, 'El contenido no puede superar los 5000 caracteres')
     .trim(),
   rating: z
     .number()
     .min(0, 'La puntuación mínima es 0')
-    .max(10, 'La puntuación máxima es 10'),
+    .max(10, 'La puntuación máxima es 10')
+    .optional()
+    .default(0),
   spoilers: z.boolean().default(false),
 })
 

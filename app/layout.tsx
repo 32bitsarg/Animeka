@@ -31,6 +31,13 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Animeka - Tu Portal Anime Definitivo",
   description: "Descubre, rastrea y organiza tu colección de anime favorito con Animeka. Miles de animes, gratis y actualizado 24/7.",
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', type: 'image/x-icon' },
+    ],
+    apple: '/icon.svg',
+  },
 };
 
 export default function RootLayout({

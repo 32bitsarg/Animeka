@@ -6,15 +6,6 @@ import AnimeCard from '@/components/AnimeCard'
 import { LoadingCard } from '@/components/Loading'
 import { getRandomAnime, getAnimeByGenres } from '@/lib/services/jikan'
 import type { Anime } from '@/lib/types/anime'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { 
-  faFire, 
-  faFaceLaugh, 
-  faFaceSadTear, 
-  faWandMagicSparkles, 
-  faRobot, 
-  faHeart 
-} from '@fortawesome/free-solid-svg-icons'
 
 const GENRES = [
   { id: 1, name: 'Acción' },
@@ -29,13 +20,109 @@ const GENRES = [
   { id: 41, name: 'Thriller' },
 ]
 
+// Componentes SVG personalizados para cada mood
+const FireIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
+    <path d="M12 2C8 6 6 10 6 14C6 17.31 8.69 20 12 20C15.31 20 18 17.31 18 14C18 10 16 6 12 2Z" fill="url(#fireGradient)" />
+    <path d="M12 6C10 8 9 10 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10 14 8 12 6Z" fill="url(#fireGradient2)" opacity="0.8" />
+    <defs>
+      <linearGradient id="fireGradient" x1="12" y1="2" x2="12" y2="20">
+        <stop offset="0%" stopColor="#FF6B35" />
+        <stop offset="100%" stopColor="#F7931E" />
+      </linearGradient>
+      <linearGradient id="fireGradient2" x1="12" y1="6" x2="12" y2="15">
+        <stop offset="0%" stopColor="#FFD700" />
+        <stop offset="100%" stopColor="#FF6B35" />
+      </linearGradient>
+    </defs>
+  </svg>
+)
+
+const LaughIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
+    <circle cx="12" cy="12" r="10" fill="url(#laughGradient)" />
+    <circle cx="8" cy="9" r="1.5" fill="#1a1a1a" />
+    <circle cx="16" cy="9" r="1.5" fill="#1a1a1a" />
+    <path d="M8 15C8 15 10 17 12 17C14 17 16 15 16 15" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" fill="none" />
+    <defs>
+      <linearGradient id="laughGradient" x1="12" y1="2" x2="12" y2="22">
+        <stop offset="0%" stopColor="#FFD700" />
+        <stop offset="100%" stopColor="#FFA500" />
+      </linearGradient>
+    </defs>
+  </svg>
+)
+
+const EmotionalIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
+    <circle cx="12" cy="12" r="10" fill="url(#emotionalGradient)" />
+    <circle cx="8" cy="9" r="1.5" fill="#1a1a1a" />
+    <circle cx="16" cy="9" r="1.5" fill="#1a1a1a" />
+    <path d="M8 16C8 16 10 18 12 18C14 18 16 16 16 16" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" fill="none" />
+    <circle cx="10" cy="17" r="1" fill="#1a1a1a" />
+    <circle cx="14" cy="17" r="1" fill="#1a1a1a" />
+    <defs>
+      <linearGradient id="emotionalGradient" x1="12" y1="2" x2="12" y2="22">
+        <stop offset="0%" stopColor="#4A90E2" />
+        <stop offset="100%" stopColor="#7B68EE" />
+      </linearGradient>
+    </defs>
+  </svg>
+)
+
+const FantasyIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
+    <path d="M12 2L15 9L22 10L17 15L18 22L12 18L6 22L7 15L2 10L9 9L12 2Z" fill="url(#fantasyGradient)" />
+    <circle cx="12" cy="12" r="3" fill="url(#fantasyGradient2)" opacity="0.6" />
+    <defs>
+      <linearGradient id="fantasyGradient" x1="12" y1="2" x2="12" y2="22">
+        <stop offset="0%" stopColor="#9B59B6" />
+        <stop offset="100%" stopColor="#E91E63" />
+      </linearGradient>
+      <linearGradient id="fantasyGradient2" x1="12" y1="9" x2="12" y2="15">
+        <stop offset="0%" stopColor="#FFD700" />
+        <stop offset="100%" stopColor="#FFA500" />
+      </linearGradient>
+    </defs>
+  </svg>
+)
+
+const FuturisticIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
+    <rect x="6" y="8" width="12" height="10" rx="2" fill="url(#futuristicGradient)" />
+    <circle cx="9" cy="11" r="1.5" fill="#00D4FF" />
+    <circle cx="12" cy="13" r="1" fill="#00D4FF" />
+    <circle cx="15" cy="11" r="1.5" fill="#00D4FF" />
+    <path d="M8 6L12 2L16 6" stroke="url(#futuristicGradient)" strokeWidth="2" strokeLinecap="round" fill="none" />
+    <path d="M8 18L12 22L16 18" stroke="url(#futuristicGradient)" strokeWidth="2" strokeLinecap="round" fill="none" />
+    <defs>
+      <linearGradient id="futuristicGradient" x1="12" y1="2" x2="12" y2="22">
+        <stop offset="0%" stopColor="#00D4FF" />
+        <stop offset="100%" stopColor="#0066FF" />
+      </linearGradient>
+    </defs>
+  </svg>
+)
+
+const RomanticIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="url(#romanticGradient)" />
+    <defs>
+      <linearGradient id="romanticGradient" x1="12" y1="3" x2="12" y2="21.35">
+        <stop offset="0%" stopColor="#FF69B4" />
+        <stop offset="100%" stopColor="#FF1493" />
+      </linearGradient>
+    </defs>
+  </svg>
+)
+
 const MOODS = [
-  { icon: faFire, label: 'Emocionante', genres: [1, 2], color: 'from-orange-500 to-red-600' },
-  { icon: faFaceLaugh, label: 'Divertido', genres: [4, 36], color: 'from-yellow-400 to-orange-500' },
-  { icon: faFaceSadTear, label: 'Emocional', genres: [8, 22], color: 'from-blue-400 to-purple-500' },
-  { icon: faWandMagicSparkles, label: 'Fantástico', genres: [10, 37], color: 'from-purple-500 to-pink-500' },
-  { icon: faRobot, label: 'Futurista', genres: [24, 1], color: 'from-cyan-400 to-blue-600' },
-  { icon: faHeart, label: 'Romántico', genres: [22, 8], color: 'from-pink-500 to-red-500' },
+  { icon: FireIcon, label: 'Emocionante', genres: [1, 2], color: 'from-orange-500 to-red-600' },
+  { icon: LaughIcon, label: 'Divertido', genres: [4, 36], color: 'from-yellow-400 to-orange-500' },
+  { icon: EmotionalIcon, label: 'Emocional', genres: [8, 22], color: 'from-blue-400 to-purple-500' },
+  { icon: FantasyIcon, label: 'Fantástico', genres: [10, 37], color: 'from-purple-500 to-pink-500' },
+  { icon: FuturisticIcon, label: 'Futurista', genres: [24, 1], color: 'from-cyan-400 to-blue-600' },
+  { icon: RomanticIcon, label: 'Romántico', genres: [22, 8], color: 'from-pink-500 to-red-500' },
 ]
 
 export default function DiscoverPage() {
@@ -154,13 +241,10 @@ export default function DiscoverPage() {
                 {/* Efecto de brillo en hover */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#CF50F2]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full" />
                 
-                {/* Icono SVG con gradiente */}
+                {/* Icono SVG personalizado con gradiente */}
                 <div className="mb-3 relative z-10 transform group-hover:scale-110 transition-transform duration-300 flex justify-center">
-                  <div className={`w-16 h-16 flex items-center justify-center bg-gradient-to-br ${mood.color} rounded-full p-3 shadow-lg`}>
-                    <FontAwesomeIcon 
-                      icon={mood.icon} 
-                      className="text-white text-2xl"
-                    />
+                  <div className={`w-20 h-20 flex items-center justify-center bg-gradient-to-br ${mood.color} rounded-full p-4 shadow-lg group-hover:shadow-xl transition-shadow`}>
+                    <mood.icon />
                   </div>
                 </div>
                 <div className="font-semibold text-foreground relative z-10">{mood.label}</div>

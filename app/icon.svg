@@ -1,0 +1,36 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#CF50F2" />
+      <stop offset="50%" stop-color="#AC79F2" />
+      <stop offset="100%" stop-color="#8552F2" />
+    </linearGradient>
+    <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD700" />
+      <stop offset="100%" stop-color="#FFA500" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Fondo con bordes redondeados -->
+  <rect width="64" height="64" rx="14" fill="url(#bgGradient)"/>
+  
+  <!-- Estrella decorativa superior -->
+  <path d="M32 8L35 20L47 23L35 26L32 38L29 26L17 23L29 20L32 8Z" fill="url(#starGradient)" opacity="0.9" filter="url(#glow)"/>
+  
+  <!-- Letra "A" estilizada -->
+  <path d="M32 18L24 42L28 42L30 36L34 36L36 42L40 42L32 18ZM32 26L33.5 32L30.5 32L32 26Z" fill="white" opacity="0.95"/>
+  
+  <!-- Puntos decorativos en las esquinas -->
+  <circle cx="12" cy="12" r="3" fill="white" opacity="0.6"/>
+  <circle cx="52" cy="12" r="3" fill="white" opacity="0.6"/>
+  <circle cx="12" cy="52" r="3" fill="white" opacity="0.6"/>
+  <circle cx="52" cy="52" r="3" fill="white" opacity="0.6"/>
+</svg>
+

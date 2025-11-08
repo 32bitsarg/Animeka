@@ -160,33 +160,40 @@ export async function POST(request: NextRequest) {
 
     const { animeId, animeTitle, animeImage, content, rating, spoilers } = validation.data
 
-    // Verificar si ya tiene una recomendación para este anime
-    const existing = await prisma.recommendation.findFirst({
-      where: {
-        userId: user.id,
-        animeId,
-      },
-    })
+    // Si es una opinión sin anime, usar valores por defecto
+    const isOpinion = !animeId || !animeTitle || animeTitle === 'Opinión General'
+    const finalAnimeId = isOpinion ? 0 : animeId
+    const finalAnimeTitle = isOpinion ? 'Opinión General' : animeTitle
 
-    if (existing) {
-      return NextResponse.json(
-        { success: false, error: 'Ya has recomendado este anime' },
-        { status: 400 }
-      )
+    // Solo verificar duplicados si es una recomendación con anime
+    if (!isOpinion) {
+      const existing = await prisma.recommendation.findFirst({
+        where: {
+          userId: user.id,
+          animeId: finalAnimeId,
+        },
+      })
+
+      if (existing) {
+        return NextResponse.json(
+          { success: false, error: 'Ya has recomendado este anime' },
+          { status: 400 }
+        )
+      }
     }
 
     // Sanitizar contenido de texto
     const sanitizedContent = sanitizeText(content)
-    const sanitizedTitle = sanitizeText(animeTitle)
+    const sanitizedTitle = sanitizeText(finalAnimeTitle)
 
     const recommendation = await prisma.recommendation.create({
       data: {
         userId: user.id,
-        animeId,
+        animeId: finalAnimeId,
         animeTitle: sanitizedTitle,
         animeImage: animeImage || null,
         content: sanitizedContent,
-        rating,
+        rating: rating || 0,
         spoilers: spoilers || false,
       },
       include: {
