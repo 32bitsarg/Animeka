@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
 
     // Optimizar y redimensionar imagen antes de convertir a base64
     // Para evitar problemas con imágenes muy grandes en base64
-    let optimizedBuffer = buffer
+    let optimizedBuffer: Buffer = buffer
     let optimizedType = file.type
 
     // Intentar usar sharp si está disponible, sino usar canvas nativo o simplemente limitar tamaño
@@ -102,19 +102,20 @@ export async function POST(request: NextRequest) {
       const maxHeight = type === 'avatar' ? 200 : 400
       const quality = type === 'avatar' ? 75 : 70  // Calidad más baja para base64
 
-      optimizedBuffer = await sharp.default(buffer)
+      const sharpInstance = sharp.default(buffer as Buffer)
+      optimizedBuffer = await sharpInstance
         .resize(maxWidth, maxHeight, {
           fit: 'inside',
           withoutEnlargement: true,
         })
         .jpeg({ quality, mozjpeg: true })
-        .toBuffer()
+        .toBuffer() as Buffer
       
       optimizedType = 'image/jpeg'
       console.log(`✅ Imagen optimizada: ${file.size} bytes -> ${optimizedBuffer.length} bytes`)
     } catch (sharpError) {
       // Si sharp no está disponible, usar el buffer original pero validar tamaño
-      console.warn('⚠️ Sharp no disponible, usando imagen original')
+      console.warn('⚠️ Sharp no disponible, usando imagen original:', sharpError)
       if (buffer.length > 500000) { // Si la imagen es mayor a 500KB sin optimizar
         return NextResponse.json(
           { success: false, error: 'La imagen es demasiado grande. Por favor, usa una imagen más pequeña (máximo 500KB).' },
