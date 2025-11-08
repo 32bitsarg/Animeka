@@ -3,14 +3,30 @@
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { motion } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars, faXmark, faUser } from '@fortawesome/free-solid-svg-icons'
 import Logo from './Logo'
+import Image from 'next/image'
 
 export default function Navbar() {
   const { data: session } = useSession()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [userImage, setUserImage] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (session?.user) {
+      // Obtener imagen del usuario
+      fetch('/api/user/me')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.user?.image) {
+            setUserImage(data.user.image)
+          }
+        })
+        .catch(err => console.error('Error fetching user image:', err))
+    }
+  }, [session])
 
   return (
     <motion.nav
@@ -29,17 +45,14 @@ export default function Navbar() {
             <NavLink href="/discover">Descubrir</NavLink>
             <NavLink href="/search">Buscar</NavLink>
             {session && (
-              <>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Link 
-                    href="/recomendar"
-                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#CF50F2] to-[#8552F2] text-white font-bold shadow-lg shadow-[#CF50F2]/30 hover:shadow-[#CF50F2]/50 transition-all"
-                  >
-                    ✨ Recomendar
-                  </Link>
-                </motion.div>
-                <NavLink href="/perfil">Perfil</NavLink>
-              </>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link 
+                  href="/recomendar"
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#CF50F2] to-[#8552F2] text-white font-bold shadow-lg shadow-[#CF50F2]/30 hover:shadow-[#CF50F2]/50 transition-all"
+                >
+                  ✨ Recomendar
+                </Link>
+              </motion.div>
             )}
           </div>
 
@@ -47,12 +60,38 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-4">
             {session ? (
               <>
-                <div className="flex items-center space-x-3 px-4 py-2 rounded-lg bg-card/50">
-                  <FontAwesomeIcon icon={faUser} className="text-primary" />
-                  <span className="text-sm font-poppins text-foreground/90">
-                    {session.user?.name || session.user?.email}
-                  </span>
-                </div>
+                <Link href="/perfil">
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center space-x-3 px-4 py-2 rounded-lg bg-card/50 hover:bg-card/70 transition-colors cursor-pointer"
+                  >
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-[#CF50F2] to-[#8552F2] flex-shrink-0">
+                      {userImage ? (
+                        userImage.startsWith('data:') ? (
+                          <img
+                            src={userImage}
+                            alt={session.user?.name || 'Usuario'}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Image
+                            src={userImage}
+                            alt={session.user?.name || 'Usuario'}
+                            fill
+                            className="object-cover"
+                          />
+                        )
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <FontAwesomeIcon icon={faUser} className="text-white text-sm" />
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-sm font-poppins text-foreground/90">
+                      {session.user?.name || session.user?.email}
+                    </span>
+                  </motion.div>
+                </Link>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -110,23 +149,51 @@ export default function Navbar() {
             <MobileNavLink href="/discover">Descubrir</MobileNavLink>
             <MobileNavLink href="/search">Buscar</MobileNavLink>
             {session && (
-              <>
-                <Link href="/recomendar" className="block">
-                  <div className="px-3 py-2 rounded-lg bg-gradient-to-r from-[#CF50F2] to-[#8552F2] text-white font-bold text-center shadow-lg shadow-[#CF50F2]/30">
-                    ✨ Recomendar
-                  </div>
-                </Link>
-                <MobileNavLink href="/perfil">Perfil</MobileNavLink>
-              </>
+              <Link href="/recomendar" className="block">
+                <div className="px-3 py-2 rounded-lg bg-gradient-to-r from-[#CF50F2] to-[#8552F2] text-white font-bold text-center shadow-lg shadow-[#CF50F2]/30">
+                  ✨ Recomendar
+                </div>
+              </Link>
             )}
             <div className="pt-3 border-t border-border">
               {session ? (
-                <button
-                  onClick={() => signOut()}
-                  className="w-full text-left px-3 py-2 rounded-lg bg-error/10 text-error"
-                >
-                  Cerrar Sesión
-                </button>
+                <>
+                  <Link href="/perfil" className="block mb-2">
+                    <div className="flex items-center space-x-3 px-3 py-2 rounded-lg bg-card/50 hover:bg-card/70 transition-colors">
+                      <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-[#CF50F2] to-[#8552F2] flex-shrink-0">
+                        {userImage ? (
+                          userImage.startsWith('data:') ? (
+                            <img
+                              src={userImage}
+                              alt={session.user?.name || 'Usuario'}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <Image
+                              src={userImage}
+                              alt={session.user?.name || 'Usuario'}
+                              fill
+                              className="object-cover"
+                            />
+                          )
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <FontAwesomeIcon icon={faUser} className="text-white text-sm" />
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-sm font-poppins text-foreground/90">
+                        {session.user?.name || session.user?.email}
+                      </span>
+                    </div>
+                  </Link>
+                  <button
+                    onClick={() => signOut()}
+                    className="w-full text-left px-3 py-2 rounded-lg bg-error/10 text-error"
+                  >
+                    Cerrar Sesión
+                  </button>
+                </>
               ) : (
                 <div className="space-y-2">
                   <Link href="/auth/signin" className="block">

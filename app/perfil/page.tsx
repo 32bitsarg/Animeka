@@ -216,12 +216,20 @@ export default function PerfilPage() {
         {/* Banner */}
         <div className="relative h-64 bg-gradient-to-br from-[#382059] via-[#2a1844] to-[#1d0f30]">
           {profile.banner ? (
-            <Image
-              src={profile.banner}
-              alt="Banner"
-              fill
-              className="object-cover"
-            />
+            profile.banner.startsWith('data:') ? (
+              <img
+                src={profile.banner}
+                alt="Banner"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Image
+                src={profile.banner}
+                alt="Banner"
+                fill
+                className="object-cover"
+              />
+            )
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-[#382059] via-[#2a1844] to-[#1d0f30]" />
           )}
@@ -259,12 +267,20 @@ export default function PerfilPage() {
             <div className="relative inline-block">
               <div className="relative w-32 h-32 rounded-full border-4 border-[#0D0D0D] overflow-hidden bg-gradient-to-br from-[#CF50F2] to-[#8552F2]">
                 {profile.image ? (
-                  <Image
-                    src={profile.image}
-                    alt={profile.name || 'Usuario'}
-                    fill
-                    className="object-cover"
-                  />
+                  profile.image.startsWith('data:') ? (
+                    <img
+                      src={profile.image}
+                      alt={profile.name || 'Usuario'}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Image
+                      src={profile.image}
+                      alt={profile.name || 'Usuario'}
+                      fill
+                      className="object-cover"
+                    />
+                  )
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <FontAwesomeIcon icon={faUser} className="text-white text-5xl" />
