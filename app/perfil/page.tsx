@@ -610,7 +610,7 @@ export default function PerfilPage() {
         }}
         onCropComplete={handleCropComplete}
         type={cropType}
-        aspectRatio={cropType === 'avatar' ? 1 : 3}
+        aspectRatio={cropType === 'avatar' ? 1 : 5}
       />
     </div>
   )

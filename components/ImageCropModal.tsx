@@ -64,12 +64,15 @@ export default function ImageCropModal({
     }
 
     // Calcular dimensiones del canvas según el tipo
-    const maxSize = type === 'avatar' ? 200 : 1200
+    // Avatar: 200x200 (1:1)
+    // Banner: 1280x256 (5:1) - coincide con h-64 (256px) y ancho típico de pantalla
+    const maxWidth = type === 'avatar' ? 200 : 1280
+    const maxHeight = type === 'avatar' ? 200 : 256
     const scaleX = image.naturalWidth / image.width
     const scaleY = image.naturalHeight / image.height
 
-    canvas.width = Math.min(pixelCrop.width * scaleX, maxSize)
-    canvas.height = Math.min(pixelCrop.height * scaleY, type === 'avatar' ? 200 : 400)
+    canvas.width = Math.min(pixelCrop.width * scaleX, maxWidth)
+    canvas.height = Math.min(pixelCrop.height * scaleY, maxHeight)
 
     ctx.drawImage(
       image,
