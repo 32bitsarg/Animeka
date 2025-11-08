@@ -1,5 +1,6 @@
 'use client'
 
+import { memo, useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -12,7 +13,23 @@ interface AnimeCardProps {
   priority?: boolean
 }
 
-export default function AnimeCard({ anime, index = 0, priority = false }: AnimeCardProps) {
+// Optimizado con React.memo para evitar re-renders innecesarios
+function AnimeCard({ anime, index = 0, priority = false }: AnimeCardProps) {
+  // Memoizar valores calculados
+  const imageUrl = useMemo(
+    () => anime.images.webp.large_image_url || anime.images.jpg.large_image_url,
+    [anime.images]
+  )
+
+  const firstTwoGenres = useMemo(
+    () => anime.genres?.slice(0, 2) || [],
+    [anime.genres]
+  )
+
+  const remainingGenresCount = useMemo(
+    () => (anime.genres?.length || 0) > 2 ? (anime.genres?.length || 0) - 2 : 0,
+    [anime.genres]
+  )
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -26,7 +43,7 @@ export default function AnimeCard({ anime, index = 0, priority = false }: AnimeC
           {/* Imagen */}
           <div className="relative aspect-[2/3] overflow-hidden">
             <Image
-              src={anime.images.webp.large_image_url || anime.images.jpg.large_image_url}
+              src={imageUrl}
               alt={anime.title}
               fill
               className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
@@ -92,10 +109,10 @@ export default function AnimeCard({ anime, index = 0, priority = false }: AnimeC
               </div>
             </div>
 
-            {/* Genres - Estilo mejorado */}
-            {anime.genres && anime.genres.length > 0 && (
+            {/* Genres - Estilo mejorado con valores memoizados */}
+            {firstTwoGenres.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-auto">
-                {anime.genres.slice(0, 2).map((genre) => (
+                {firstTwoGenres.map((genre) => (
                   <span 
                     key={genre.mal_id}
                     className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#8552F2]/20 text-[#AC79F2] border border-[#8552F2]/30 hover:bg-[#8552F2]/30 transition-colors"
@@ -103,9 +120,9 @@ export default function AnimeCard({ anime, index = 0, priority = false }: AnimeC
                     {genre.name}
                   </span>
                 ))}
-                {anime.genres.length > 2 && (
+                {remainingGenresCount > 0 && (
                   <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#CF50F2]/20 text-[#CF50F2] border border-[#CF50F2]/30">
-                    +{anime.genres.length - 2}
+                    +{remainingGenresCount}
                   </span>
                 )}
               </div>
@@ -121,5 +138,14 @@ export default function AnimeCard({ anime, index = 0, priority = false }: AnimeC
     </motion.div>
   )
 }
+
+// Exportar con memo y comparación personalizada
+export default memo(AnimeCard, (prevProps, nextProps) => {
+  return (
+    prevProps.anime.mal_id === nextProps.anime.mal_id &&
+    prevProps.index === nextProps.index &&
+    prevProps.priority === nextProps.priority
+  )
+})
 
 
