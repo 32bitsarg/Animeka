@@ -6,6 +6,15 @@ import AnimeCard from '@/components/AnimeCard'
 import { LoadingCard } from '@/components/Loading'
 import { getRandomAnime, getAnimeByGenres } from '@/lib/services/jikan'
 import type { Anime } from '@/lib/types/anime'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { 
+  faFire, 
+  faFaceLaugh, 
+  faFaceSadTear, 
+  faWandMagicSparkles, 
+  faRobot, 
+  faHeart 
+} from '@fortawesome/free-solid-svg-icons'
 
 const GENRES = [
   { id: 1, name: 'Acción' },
@@ -21,12 +30,12 @@ const GENRES = [
 ]
 
 const MOODS = [
-  { emoji: '🔥', label: 'Emocionante', genres: [1, 2] },
-  { emoji: '😂', label: 'Divertido', genres: [4, 36] },
-  { emoji: '😢', label: 'Emocional', genres: [8, 22] },
-  { emoji: '🧙', label: 'Fantástico', genres: [10, 37] },
-  { emoji: '🤖', label: 'Futurista', genres: [24, 1] },
-  { emoji: '💕', label: 'Romántico', genres: [22, 8] },
+  { icon: faFire, label: 'Emocionante', genres: [1, 2], color: 'from-orange-500 to-red-600' },
+  { icon: faFaceLaugh, label: 'Divertido', genres: [4, 36], color: 'from-yellow-400 to-orange-500' },
+  { icon: faFaceSadTear, label: 'Emocional', genres: [8, 22], color: 'from-blue-400 to-purple-500' },
+  { icon: faWandMagicSparkles, label: 'Fantástico', genres: [10, 37], color: 'from-purple-500 to-pink-500' },
+  { icon: faRobot, label: 'Futurista', genres: [24, 1], color: 'from-cyan-400 to-blue-600' },
+  { icon: faHeart, label: 'Romántico', genres: [22, 8], color: 'from-pink-500 to-red-500' },
 ]
 
 export default function DiscoverPage() {
@@ -145,8 +154,14 @@ export default function DiscoverPage() {
                 {/* Efecto de brillo en hover */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#CF50F2]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full" />
                 
-                <div className="text-6xl mb-3 relative z-10 transform group-hover:scale-110 transition-transform duration-300">
-                  {mood.emoji}
+                {/* Icono SVG con gradiente */}
+                <div className="mb-3 relative z-10 transform group-hover:scale-110 transition-transform duration-300 flex justify-center">
+                  <div className={`w-16 h-16 flex items-center justify-center bg-gradient-to-br ${mood.color} rounded-full p-3 shadow-lg`}>
+                    <FontAwesomeIcon 
+                      icon={mood.icon} 
+                      className="text-white text-2xl"
+                    />
+                  </div>
                 </div>
                 <div className="font-semibold text-foreground relative z-10">{mood.label}</div>
               </motion.button>
