@@ -7,3 +7,4 @@ ALTER TABLE `User` MODIFY COLUMN `image` TEXT;
 -- Actualizar campo banner a TEXT  
 ALTER TABLE `User` MODIFY COLUMN `banner` TEXT;
 
+
