@@ -54,12 +54,35 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
+        token.image = user.image
+      }
+      // Actualizar imagen desde la base de datos si el token tiene un ID
+      if (token.id && !token.image) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { image: true },
+        })
+        if (dbUser?.image) {
+          token.image = dbUser.image
+        }
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string
+        // Obtener imagen actualizada de la base de datos
+        if (token.id) {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { image: true },
+          })
+          if (dbUser?.image) {
+            session.user.image = dbUser.image
+          } else {
+            session.user.image = token.image as string | null | undefined
+          }
+        }
       }
       return session
     }
