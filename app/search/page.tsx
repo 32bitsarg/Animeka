@@ -53,11 +53,11 @@ function SearchContent() {
   }
 
   return (
-    <div className="min-h-screen py-12">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen py-6 sm:py-8 md:py-12">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6">
         {/* Search Bar */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold text-center mb-8">
+        <div className="mb-8 sm:mb-10 md:mb-12">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8">
             Buscar Anime
           </h1>
           <SearchBar placeholder="Buscar por título..." autoFocus />
@@ -67,14 +67,14 @@ function SearchContent() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 p-6 bg-card rounded-xl"
+          className="mb-6 sm:mb-8 p-4 sm:p-5 md:p-6 bg-card rounded-xl"
         >
-          <h3 className="text-lg font-semibold mb-4">Filtros</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Filtros</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <select
               value={filters.type || ''}
               onChange={(e) => handleFilterChange('type', e.target.value)}
-              className="px-4 py-2 rounded-lg bg-background border border-border text-foreground"
+              className="px-3 sm:px-4 py-2 rounded-lg bg-background border border-border text-foreground text-sm sm:text-base"
             >
               <option value="">Todos los tipos</option>
               <option value="tv">TV</option>
@@ -132,14 +132,14 @@ function SearchContent() {
         )}
 
         {loading && page === 1 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
             {[...Array(24)].map((_, i) => (
               <LoadingCard key={i} />
             ))}
           </div>
         ) : results.length > 0 ? (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
               {results.map((anime, index) => (
                 <AnimeCard key={`${anime.mal_id}-${index}`} anime={anime} index={index} />
               ))}
@@ -147,13 +147,13 @@ function SearchContent() {
 
             {/* Load More */}
             {hasMore && (
-              <div className="text-center mt-12">
+              <div className="text-center mt-8 sm:mt-10 md:mt-12">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setPage(page + 1)}
                   disabled={loading}
-                  className="px-8 py-3 rounded-lg gradient-primary text-white font-medium disabled:opacity-50"
+                  className="px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg gradient-primary text-white font-medium disabled:opacity-50 text-sm sm:text-base"
                 >
                   {loading ? 'Cargando...' : 'Cargar más'}
                 </motion.button>

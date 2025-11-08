@@ -22,7 +22,7 @@ export default function HeroBanner({
   className = ''
 }: HeroBannerProps) {
   return (
-    <section className={`relative h-[600px] md:h-[700px] overflow-hidden ${className}`}>
+    <section className={`relative h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden ${className}`}>
       {/* Imagen de fondo */}
       <div className="absolute inset-0">
         <Image
@@ -40,8 +40,8 @@ export default function HeroBanner({
       </div>
 
       {/* Contenido */}
-      <div className="relative z-10 h-full flex items-end pb-16 md:pb-24">
-        <div className="container mx-auto px-4">
+      <div className="relative z-10 h-full flex items-end pb-8 sm:pb-12 md:pb-16 lg:pb-24">
+        <div className="container mx-auto px-3 sm:px-4 md:px-6">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -66,7 +66,7 @@ export default function HeroBanner({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-5xl md:text-7xl lg:text-8xl font-poppins font-black text-foreground mb-6 leading-tight"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-poppins font-black text-foreground mb-4 sm:mb-6 leading-tight"
             >
               {title}
             </motion.h1>
@@ -76,7 +76,7 @@ export default function HeroBanner({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="text-lg md:text-xl text-foreground/80 mb-8 max-w-2xl font-inter leading-relaxed"
+                className="text-sm sm:text-base md:text-lg lg:text-xl text-foreground/80 mb-6 sm:mb-8 max-w-2xl font-inter leading-relaxed"
               >
                 {description}
               </motion.p>

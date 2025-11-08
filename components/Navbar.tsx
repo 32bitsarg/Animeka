@@ -66,13 +66,13 @@ export default function Navbar() {
       animate={{ y: 0 }}
       className="sticky top-0 z-50 bg-black/90 backdrop-blur-xl border-b border-white/5"
     >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6">
+        <div className="flex items-center justify-between h-16 sm:h-18 md:h-20">
           {/* Logo */}
           <Logo size="md" />
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden lg:flex items-center space-x-4 xl:space-x-6">
             <NavLink href="/">Inicio</NavLink>
             <NavLink href="/discover">Descubrir</NavLink>
             <NavLink href="/search">Buscar</NavLink>
@@ -90,7 +90,7 @@ export default function Navbar() {
           </div>
 
           {/* User Menu */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-3 xl:space-x-4">
             {session ? (
               <>
                 <Link href="/perfil" prefetch={true}>
@@ -160,12 +160,12 @@ export default function Navbar() {
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden p-2 hover:bg-card rounded-lg transition-colors"
+            className="lg:hidden p-2 hover:bg-card rounded-lg transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <FontAwesomeIcon 
               icon={mobileMenuOpen ? faXmark : faBars} 
-              className="text-2xl"
+              className="text-xl sm:text-2xl"
             />
           </button>
         </div>
@@ -176,7 +176,7 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden py-4 space-y-3"
+            className="lg:hidden py-4 space-y-2 sm:space-y-3"
           >
             <MobileNavLink href="/">Inicio</MobileNavLink>
             <MobileNavLink href="/discover">Descubrir</MobileNavLink>

@@ -23,7 +23,7 @@ export default function Hero({
   showStats = true
 }: HeroProps) {
   return (
-    <section className={`relative py-24 md:py-32 overflow-hidden ${className}`}>
+    <section className={`relative py-12 sm:py-16 md:py-24 lg:py-32 overflow-hidden ${className}`}>
       {/* Background decorativo con gradiente animado */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 opacity-30" />
       <div className="absolute inset-0">
@@ -31,7 +31,7 @@ export default function Hero({
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
       
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -57,7 +57,7 @@ export default function Hero({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
-              className="text-5xl md:text-7xl lg:text-8xl"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl xl:text-8xl"
             >
               <span className="block gradient-primary bg-clip-text text-transparent">
                 {title}
@@ -71,7 +71,7 @@ export default function Hero({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.6 }}
-              className="text-xl md:text-2xl text-foreground/80 mb-12 max-w-3xl mx-auto font-inter"
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-foreground/80 mb-8 sm:mb-10 md:mb-12 max-w-3xl mx-auto font-inter"
             >
               {subtitle}
             </motion.p>
@@ -92,24 +92,24 @@ export default function Hero({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9, duration: 0.6 }}
-              className="flex flex-wrap justify-center gap-8 mt-12"
+              className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 mt-8 sm:mt-10 md:mt-12"
             >
               <div className="flex items-center space-x-2">
                 <FontAwesomeIcon icon={faStar} className="text-yellow-400" size="lg" />
-                <span className="font-poppins text-foreground/70">
-                  <span className="font-bold text-2xl text-foreground">10K+</span> Animes
+                <span className="font-poppins text-foreground/70 text-sm sm:text-base">
+                  <span className="font-bold text-xl sm:text-2xl text-foreground">10K+</span> Animes
                 </span>
               </div>
               <div className="flex items-center space-x-2">
                 <FontAwesomeIcon icon={faFireFlameCurved} className="text-orange-400" size="lg" />
-                <span className="font-poppins text-foreground/70">
-                  <span className="font-bold text-2xl text-foreground">100%</span> Gratis
+                <span className="font-poppins text-foreground/70 text-sm sm:text-base">
+                  <span className="font-bold text-xl sm:text-2xl text-foreground">100%</span> Gratis
                 </span>
               </div>
               <div className="flex items-center space-x-2">
                 <FontAwesomeIcon icon={faPlay} className="text-primary" size="lg" />
-                <span className="font-poppins text-foreground/70">
-                  <span className="font-bold text-2xl text-foreground">24/7</span> Actualizado
+                <span className="font-poppins text-foreground/70 text-sm sm:text-base">
+                  <span className="font-bold text-xl sm:text-2xl text-foreground">24/7</span> Actualizado
                 </span>
               </div>
             </motion.div>

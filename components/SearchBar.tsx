@@ -48,11 +48,10 @@ export default function SearchBar({
       >
         <div className="relative group">
           {/* Icono de búsqueda */}
-          <div className="absolute left-6 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+          <div className="absolute left-3 sm:left-4 md:left-6 top-1/2 -translate-y-1/2 pointer-events-none z-10">
             <FontAwesomeIcon 
               icon={faMagnifyingGlass} 
-              className={`transition-colors ${isFocused ? 'text-primary' : 'text-foreground/40'}`}
-              size="lg"
+              className={`transition-colors text-sm sm:text-base md:text-lg ${isFocused ? 'text-primary' : 'text-foreground/40'}`}
             />
           </div>
 
@@ -66,14 +65,14 @@ export default function SearchBar({
             placeholder={placeholder}
             autoFocus={autoFocus}
             className="
-              w-full pl-16 pr-[140px] py-5 
-              rounded-2xl
+              w-full pl-12 sm:pl-16 pr-[100px] sm:pr-[140px] py-3 sm:py-4 md:py-5 
+              rounded-xl sm:rounded-2xl
               bg-card/90 backdrop-blur-md
               border-2 border-border
-              text-foreground text-lg
+              text-foreground text-sm sm:text-base md:text-lg
               placeholder-foreground/40
               focus:border-primary focus:bg-card
-              focus:outline-none focus:ring-4 focus:ring-primary/20
+              focus:outline-none focus:ring-2 sm:focus:ring-4 focus:ring-primary/20
               transition-all duration-300
               group-hover:border-primary/50
               font-inter
@@ -87,20 +86,20 @@ export default function SearchBar({
             whileTap={{ scale: 0.95 }}
             disabled={!query.trim()}
             className={`
-              absolute right-3 top-1/2 -translate-y-1/2
-              px-6 py-3
-              rounded-xl
+              absolute right-2 sm:right-3 top-1/2 -translate-y-1/2
+              px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3
+              rounded-lg sm:rounded-xl
               gradient-primary
-              text-white font-poppins font-semibold
-              flex items-center space-x-2
+              text-white font-poppins font-semibold text-xs sm:text-sm md:text-base
+              flex items-center space-x-1 sm:space-x-2
               transition-opacity duration-300
               ${query.trim() ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}
               hover:shadow-lg hover:shadow-primary/50
               z-20
             `}
           >
-            <span>Buscar</span>
-            <FontAwesomeIcon icon={faArrowRight} />
+            <span className="hidden sm:inline">Buscar</span>
+            <FontAwesomeIcon icon={faArrowRight} className="text-xs sm:text-sm" />
           </motion.button>
 
           {/* Efecto de glow al hacer focus */}
@@ -120,9 +119,9 @@ export default function SearchBar({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="flex flex-wrap justify-center gap-2 mt-6"
+        className="flex flex-wrap justify-center gap-1.5 sm:gap-2 mt-4 sm:mt-6"
       >
-        <span className="text-sm text-foreground/50 font-inter">Popular:</span>
+        <span className="text-xs sm:text-sm text-foreground/50 font-inter hidden sm:inline">Popular:</span>
         {quickSearches.map((anime) => (
           <button
             key={anime}
@@ -135,7 +134,7 @@ export default function SearchBar({
                 router.push(`/search?q=${encodeURIComponent(anime)}`)
               }
             }}
-            className="px-3 py-1 rounded-full bg-card/50 hover:bg-card text-sm text-foreground/70 hover:text-primary transition-all duration-200 border border-border hover:border-primary/50 font-inter"
+            className="px-2 sm:px-3 py-1 rounded-full bg-card/50 hover:bg-card text-xs sm:text-sm text-foreground/70 hover:text-primary transition-all duration-200 border border-border hover:border-primary/50 font-inter"
           >
             {anime}
           </button>
