@@ -4,6 +4,10 @@ import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
 import { checkRateLimit, getIdentifier, rateLimits } from '@/lib/rate-limit'
 
+// Configurar runtime para optimizar en Vercel
+export const runtime = 'nodejs'
+export const maxDuration = 10 // Máximo 10 segundos para evitar timeouts costosos
+
 // Tipos de archivo permitidos
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -20,12 +24,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Rate limiting
+    // Rate limiting - más restrictivo para ahorrar recursos
     const identifier = `upload-image_${session.user.email}`
-    const rateLimit = await checkRateLimit(identifier, {
-      limit: 10,
-      window: 60 * 1000, // 1 minuto
-    })
+    const rateLimit = await checkRateLimit(identifier, rateLimits.upload)
 
     if (!rateLimit.success) {
       return NextResponse.json(

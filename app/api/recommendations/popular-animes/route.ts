@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { checkRateLimit, getIdentifier, rateLimits } from '@/lib/rate-limit'
+import { jsonWithCache, CACHE_HEADERS } from '@/lib/api-helpers'
+
+// Optimizar para Vercel
+export const runtime = 'nodejs'
+export const maxDuration = 5
 
 // GET - Obtener los animes más populares basados en recomendaciones y likes
 export async function GET(request: NextRequest) {
@@ -94,18 +99,20 @@ export async function GET(request: NextRequest) {
         rank: index + 1
       }))
 
-    return NextResponse.json(
+    // Usar cache helper para optimizar respuesta
+    const response = jsonWithCache(
       {
         success: true,
         data: popularAnimes,
       },
-      {
-        headers: {
-          'X-RateLimit-Limit': rateLimits.api.limit.toString(),
-          'X-RateLimit-Remaining': rateLimit.remaining.toString(),
-        }
-      }
+      CACHE_HEADERS.RECOMMENDATIONS.maxAge
     )
+    
+    // Agregar headers de rate limit
+    response.headers.set('X-RateLimit-Limit', rateLimits.api.limit.toString())
+    response.headers.set('X-RateLimit-Remaining', rateLimit.remaining.toString())
+    
+    return response
   } catch (error) {
     console.error('Error fetching popular animes:', error)
     return NextResponse.json(

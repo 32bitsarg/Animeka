@@ -11,9 +11,10 @@ const jikanClient = axios.create({
 })
 
 // Rate limiting mejorado (Jikan tiene límite de 3 req/sec y 60 req/min)
+// Más conservador para evitar rate limits y reducir costos de Vercel
 let lastRequestTime = 0
-const MIN_REQUEST_INTERVAL = 500 // ms entre requests (más conservador)
-const MAX_RETRIES = 3
+const MIN_REQUEST_INTERVAL = 400 // ms entre requests (más conservador: ~2.5 req/sec)
+const MAX_RETRIES = 2 // Reducir reintentos para ahorrar tiempo de ejecución
 
 async function rateLimit() {
   const now = Date.now()
@@ -55,7 +56,7 @@ async function makeRequest<T>(requestFn: () => Promise<T>, retries = MAX_RETRIES
 export async function getAnimeById(id: number): Promise<Anime | null> {
   const cacheKey = `anime_${id}`
   
-  // Verificar caché
+  // Verificar caché con TTL largo (24 horas)
   const cached = apiCache.get<Anime>(cacheKey)
   if (cached) return cached
   
@@ -64,8 +65,11 @@ export async function getAnimeById(id: number): Promise<Anime | null> {
     return response.data.data
   })
   
-  // Guardar en caché
-  if (result) apiCache.set(cacheKey, result)
+  // Guardar en caché con TTL largo
+  if (result) {
+    const { CACHE_TTL } = await import('../utils/cache')
+    apiCache.set(cacheKey, result, CACHE_TTL.ANIME_DETAIL)
+  }
   
   return result
 }
@@ -108,7 +112,10 @@ export async function getTopAnime(page: number = 1, limit: number = 25): Promise
     limit,
   })
   
-  if (result) apiCache.set(cacheKey, result)
+  if (result) {
+    const { CACHE_TTL } = await import('../utils/cache')
+    apiCache.set(cacheKey, result, CACHE_TTL.TOP_ANIME)
+  }
   return result
 }
 
@@ -128,7 +135,10 @@ export async function getTopRatedAnime(page: number = 1, limit: number = 25): Pr
     limit,
   })
   
-  if (result) apiCache.set(cacheKey, result)
+  if (result) {
+    const { CACHE_TTL } = await import('../utils/cache')
+    apiCache.set(cacheKey, result, CACHE_TTL.TOP_RATED)
+  }
   return result
 }
 
@@ -148,7 +158,10 @@ export async function getCurrentSeasonAnime(page: number = 1): Promise<AnimeSear
     return response.data
   })
   
-  if (result) apiCache.set(cacheKey, result)
+  if (result) {
+    const { CACHE_TTL } = await import('../utils/cache')
+    apiCache.set(cacheKey, result, CACHE_TTL.CURRENT_SEASON)
+  }
   return result
 }
 
@@ -172,10 +185,21 @@ export async function getUpcomingAnime(page: number = 1): Promise<AnimeSearchRes
  * Obtiene personajes de un anime
  */
 export async function getAnimeCharacters(animeId: number): Promise<AnimeCharacter[]> {
+  const cacheKey = `characters_${animeId}`
+  
+  const cached = apiCache.get<AnimeCharacter[]>(cacheKey)
+  if (cached) return cached
+  
   const result = await makeRequest(async () => {
     const response = await jikanClient.get<{ data: AnimeCharacter[] }>(`/anime/${animeId}/characters`)
     return response.data.data
   })
+  
+  if (result) {
+    const { CACHE_TTL } = await import('../utils/cache')
+    apiCache.set(cacheKey, result, CACHE_TTL.CHARACTERS)
+  }
+  
   return result || []
 }
 
@@ -183,10 +207,21 @@ export async function getAnimeCharacters(animeId: number): Promise<AnimeCharacte
  * Obtiene recomendaciones de un anime
  */
 export async function getAnimeRecommendations(animeId: number): Promise<AnimeRecommendation[]> {
+  const cacheKey = `recommendations_${animeId}`
+  
+  const cached = apiCache.get<AnimeRecommendation[]>(cacheKey)
+  if (cached) return cached
+  
   const result = await makeRequest(async () => {
     const response = await jikanClient.get<{ data: AnimeRecommendation[] }>(`/anime/${animeId}/recommendations`)
     return response.data.data
   })
+  
+  if (result) {
+    const { CACHE_TTL } = await import('../utils/cache')
+    apiCache.set(cacheKey, result, CACHE_TTL.RECOMMENDATIONS)
+  }
+  
   return result || []
 }
 

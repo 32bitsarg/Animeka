@@ -1,13 +1,44 @@
-// Sistema de caché simple en memoria para reducir llamadas a la API
+// Sistema de caché optimizado para reducir llamadas a la API y costos de Vercel
 interface CacheEntry<T> {
   data: T
   timestamp: number
+  ttl: number
 }
 
-class SimpleCache {
+class OptimizedCache {
   private cache: Map<string, CacheEntry<any>> = new Map()
-  private readonly DEFAULT_TTL = 5 * 60 * 1000 // 5 minutos por defecto
-  private customTTLs: Map<string, number> = new Map()
+  private readonly MAX_SIZE = 500 // Límite de entradas para evitar memory leaks
+  private cleanupInterval: NodeJS.Timeout | null = null
+
+  constructor() {
+    // Limpiar cache expirado cada 10 minutos
+    this.cleanupInterval = setInterval(() => {
+      this.cleanup()
+    }, 10 * 60 * 1000)
+  }
+
+  private cleanup() {
+    const now = Date.now()
+    let deleted = 0
+    
+    for (const [key, entry] of this.cache.entries()) {
+      if (now - entry.timestamp > entry.ttl) {
+        this.cache.delete(key)
+        deleted++
+      }
+    }
+    
+    // Si el cache está muy lleno, eliminar las entradas más antiguas
+    if (this.cache.size > this.MAX_SIZE) {
+      const entries = Array.from(this.cache.entries())
+        .sort((a, b) => a[1].timestamp - b[1].timestamp)
+      
+      const toDelete = this.cache.size - this.MAX_SIZE
+      for (let i = 0; i < toDelete; i++) {
+        this.cache.delete(entries[i][0])
+      }
+    }
+  }
 
   get<T>(key: string): T | null {
     const entry = this.cache.get(key)
@@ -16,32 +47,25 @@ class SimpleCache {
     
     // Verificar si el caché expiró
     const now = Date.now()
-    const ttl = this.customTTLs.get(key) || this.DEFAULT_TTL
-    if (now - entry.timestamp > ttl) {
+    if (now - entry.timestamp > entry.ttl) {
       this.cache.delete(key)
-      this.customTTLs.delete(key)
       return null
     }
     
     return entry.data as T
   }
 
-  set<T>(key: string, data: T, ttl?: number): void {
+  set<T>(key: string, data: T, ttl: number = 5 * 60 * 1000): void {
+    // Si el cache está lleno, limpiar primero
+    if (this.cache.size >= this.MAX_SIZE) {
+      this.cleanup()
+    }
+    
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
+      ttl,
     })
-    
-    if (ttl) {
-      this.customTTLs.set(key, ttl)
-    }
-    
-    // Auto-limpieza después del TTL
-    const cleanupTime = ttl || this.DEFAULT_TTL
-    setTimeout(() => {
-      this.cache.delete(key)
-      this.customTTLs.delete(key)
-    }, cleanupTime)
   }
 
   clear(): void {
@@ -53,15 +77,39 @@ class SimpleCache {
     if (!entry) return false
     
     const now = Date.now()
-    if (now - entry.timestamp > this.DEFAULT_TTL) {
+    if (now - entry.timestamp > entry.ttl) {
       this.cache.delete(key)
       return false
     }
     
     return true
   }
+
+  // Obtener estadísticas del cache
+  getStats() {
+    return {
+      size: this.cache.size,
+      maxSize: this.MAX_SIZE,
+    }
+  }
 }
 
 // Exportar una instancia singleton
-export const apiCache = new SimpleCache()
+export const apiCache = new OptimizedCache()
+
+// TTL predefinidos para diferentes tipos de datos
+export const CACHE_TTL = {
+  // Datos que cambian raramente - cache largo
+  ANIME_DETAIL: 24 * 60 * 60 * 1000, // 24 horas
+  TOP_ANIME: 6 * 60 * 60 * 1000, // 6 horas
+  TOP_RATED: 6 * 60 * 60 * 1000, // 6 horas
+  CURRENT_SEASON: 60 * 60 * 1000, // 1 hora
+  CHARACTERS: 12 * 60 * 60 * 1000, // 12 horas
+  RECOMMENDATIONS: 12 * 60 * 60 * 1000, // 12 horas
+  
+  // Datos que cambian más frecuentemente
+  SEARCH: 10 * 60 * 1000, // 10 minutos
+  RANDOM: 5 * 60 * 1000, // 5 minutos
+  GENRES: 30 * 60 * 1000, // 30 minutos
+}
 

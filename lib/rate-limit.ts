@@ -63,13 +63,14 @@ class RateLimiter {
 // Instancia global
 const rateLimiter = new RateLimiter()
 
-// Configuraciones predefinidas
+// Configuraciones predefinidas - Optimizadas para plan gratuito de Vercel
 export const rateLimits = {
-  signup: { limit: 5, window: 15 * 60 * 1000 }, // 5 intentos / 15 min
-  signin: { limit: 10, window: 15 * 60 * 1000 }, // 10 intentos / 15 min
-  api: { limit: 30, window: 60 * 1000 }, // 30 req / min
-  recommendations: { limit: 10, window: 60 * 1000 }, // 10 recomendaciones / min
-  likes: { limit: 50, window: 60 * 1000 }, // 50 likes / min
+  signup: { limit: 3, window: 15 * 60 * 1000 }, // 3 intentos / 15 min (más restrictivo)
+  signin: { limit: 5, window: 15 * 60 * 1000 }, // 5 intentos / 15 min (más restrictivo)
+  api: { limit: 20, window: 60 * 1000 }, // 20 req / min (reducido para ahorrar recursos)
+  recommendations: { limit: 5, window: 60 * 1000 }, // 5 recomendaciones / min
+  likes: { limit: 30, window: 60 * 1000 }, // 30 likes / min (reducido)
+  upload: { limit: 5, window: 60 * 1000 }, // 5 uploads / min
 }
 
 export async function checkRateLimit(

@@ -50,6 +50,8 @@ function AnimeCard({ anime, index = 0, priority = false }: AnimeCardProps) {
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 16vw"
               loading={priority ? 'eager' : 'lazy'}
               priority={priority}
+              quality={75}
+              unoptimized={false}
             />
             
             {/* Overlay con gradiente mejorado */}
