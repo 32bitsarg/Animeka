@@ -109,10 +109,17 @@ export async function POST(request: NextRequest) {
       ? { image: dataUrl }
       : { banner: dataUrl }
 
-    await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data: updateData,
+      select: {
+        image: true,
+        banner: true,
+      },
     })
+
+    console.log(`✅ Imagen ${type} actualizada para usuario ${user.id}`)
+    console.log(`📏 Tamaño de data URL: ${dataUrl.length} caracteres`)
 
     return NextResponse.json({
       success: true,

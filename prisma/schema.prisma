@@ -17,8 +17,8 @@ model User {
   name          String?
   email         String?   @unique
   emailVerified DateTime?
-  image         String?
-  banner        String?   // Banner del perfil estilo Twitter/X
+  image         String?   @db.Text // Imagen en base64 puede ser muy grande
+  banner        String?   @db.Text // Banner del perfil estilo Twitter/X en base64
   password      String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

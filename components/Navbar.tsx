@@ -10,21 +10,53 @@ import Logo from './Logo'
 import Image from 'next/image'
 
 export default function Navbar() {
-  const { data: session } = useSession()
+  const { data: session, update } = useSession()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userImage, setUserImage] = useState<string | null>(null)
 
-  useEffect(() => {
+  // Función para cargar la imagen del usuario
+  const loadUserImage = async () => {
     if (session?.user) {
-      // Obtener imagen del usuario
-      fetch('/api/user/me')
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && data.user?.image) {
-            setUserImage(data.user.image)
-          }
-        })
-        .catch(err => console.error('Error fetching user image:', err))
+      try {
+        const res = await fetch('/api/user/me')
+        const data = await res.json()
+        if (data.success && data.user?.image) {
+          console.log('✅ Imagen cargada en Navbar:', data.user.image.substring(0, 50) + '...')
+          setUserImage(data.user.image)
+        } else {
+          console.log('⚠️ No hay imagen en la respuesta')
+          setUserImage(null)
+        }
+      } catch (err) {
+        console.error('❌ Error fetching user image:', err)
+        setUserImage(null)
+      }
+    } else {
+      setUserImage(null)
+    }
+  }
+
+  useEffect(() => {
+    // Primero intentar usar la imagen de la sesión si está disponible
+    if (session?.user?.image) {
+      setUserImage(session.user.image)
+    } else {
+      // Si no hay imagen en la sesión, cargar desde la API
+      loadUserImage()
+    }
+  }, [session])
+
+  // Escuchar eventos de actualización de imagen desde otras páginas
+  useEffect(() => {
+    const handleImageUpdate = () => {
+      loadUserImage()
+    }
+
+    // Escuchar evento personalizado cuando se actualiza la imagen
+    window.addEventListener('userImageUpdated', handleImageUpdate)
+
+    return () => {
+      window.removeEventListener('userImageUpdated', handleImageUpdate)
     }
   }, [session])
 

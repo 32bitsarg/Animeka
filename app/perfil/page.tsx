@@ -170,6 +170,10 @@ export default function PerfilPage() {
 
       if (data.success) {
         await fetchProfile()
+        // Disparar evento para actualizar el Navbar
+        if (type === 'avatar') {
+          window.dispatchEvent(new CustomEvent('userImageUpdated'))
+        }
         if (type === 'banner') {
           setEditingBanner(false)
         } else {
