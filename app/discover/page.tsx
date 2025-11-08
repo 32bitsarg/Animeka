@@ -52,9 +52,12 @@ export default function DiscoverPage() {
 
     setLoading(true)
     try {
-      const data = await getAnimeByGenres(selectedGenres)
+      // Filtrar solo animes tipo TV (no movies ni OVAs)
+      const data = await getAnimeByGenres(selectedGenres, 1, 'tv')
       if (data?.data) {
-        setRecommendations(data.data.slice(0, 24))
+        // Filtro adicional en el cliente por si acaso
+        const tvAnimes = data.data.filter(anime => anime.type === 'TV')
+        setRecommendations(tvAnimes.slice(0, 24))
       }
     } catch (error) {
       console.error('Error fetching recommendations:', error)
@@ -66,8 +69,17 @@ export default function DiscoverPage() {
   const fetchRandomAnime = async () => {
     setLoading(true)
     try {
-      const anime = await getRandomAnime()
-      if (anime) {
+      let anime = await getRandomAnime()
+      // Filtrar hasta obtener un anime tipo TV (no movies ni OVAs)
+      let attempts = 0
+      while (anime && anime.type !== 'TV' && attempts < 10) {
+        anime = await getRandomAnime()
+        attempts++
+      }
+      if (anime && anime.type === 'TV') {
+        setRandomAnime(anime)
+      } else if (anime) {
+        // Si después de 10 intentos no encontramos TV, usar el último
         setRandomAnime(anime)
       }
     } catch (error) {
@@ -90,12 +102,10 @@ export default function DiscoverPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-12 relative z-10"
         >
-          <h1 className="text-5xl font-bold mb-4">
-            <span className="gradient-primary bg-clip-text text-transparent">
-              Descubre tu próximo anime
-            </span>
+          <h1 className="text-5xl md:text-6xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-[#CF50F2] via-[#AC79F2] to-[#8552F2]">
+            Descubre tu próximo anime
           </h1>
           <p className="text-xl text-foreground/70">
             Selecciona tu mood o géneros favoritos y encuentra algo increíble
@@ -113,13 +123,18 @@ export default function DiscoverPage() {
             {MOODS.map((mood) => (
               <motion.button
                 key={mood.label}
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.08, y: -4 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => selectMood(mood.genres)}
-                className="p-6 rounded-xl bg-card hover:bg-card-hover border-2 border-border hover:border-primary transition-all text-center"
+                className="relative p-6 rounded-2xl bg-gradient-to-br from-[#382059]/40 to-[#2a1844]/40 hover:from-[#382059]/60 hover:to-[#2a1844]/60 border-2 border-[#5a3d8f]/30 hover:border-[#CF50F2]/50 transition-all text-center backdrop-blur-sm shadow-lg hover:shadow-xl hover:shadow-[#CF50F2]/20 group overflow-hidden"
               >
-                <div className="text-4xl mb-2">{mood.emoji}</div>
-                <div className="font-semibold">{mood.label}</div>
+                {/* Efecto de brillo en hover */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#CF50F2]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full" />
+                
+                <div className="text-6xl mb-3 relative z-10 transform group-hover:scale-110 transition-transform duration-300">
+                  {mood.emoji}
+                </div>
+                <div className="font-semibold text-foreground relative z-10">{mood.label}</div>
               </motion.button>
             ))}
           </div>

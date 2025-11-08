@@ -207,13 +207,14 @@ export async function getRandomAnime(): Promise<Anime | null> {
 /**
  * Genera recomendaciones basadas en géneros
  */
-export async function getAnimeByGenres(genreIds: number[], page: number = 1): Promise<AnimeSearchResponse | null> {
+export async function getAnimeByGenres(genreIds: number[], page: number = 1, type: string = 'tv'): Promise<AnimeSearchResponse | null> {
   try {
     await rateLimit()
     const genres = genreIds.join(',')
     const response = await jikanClient.get<AnimeSearchResponse>('/anime', {
       params: {
         genres,
+        type, // Filtrar por tipo (tv, movie, ova, etc.)
         order_by: 'score',
         sort: 'desc',
         page
