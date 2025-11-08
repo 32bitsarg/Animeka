@@ -15,7 +15,7 @@ const sizeClasses = {
 
 export default function Container({ children, className = '', size = 'xl' }: ContainerProps) {
   return (
-    <div className={`container mx-auto px-4 ${sizeClasses[size]} ${className}`}>
+    <div className={`container mx-auto px-3 sm:px-4 md:px-6 ${sizeClasses[size]} ${className}`}>
       {children}
     </div>
   )

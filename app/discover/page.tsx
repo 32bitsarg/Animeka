@@ -206,18 +206,18 @@ export default function DiscoverPage() {
   }, [selectedGenres])
 
   return (
-    <div className="min-h-screen py-12">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen py-6 sm:py-8 md:py-12">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12 relative z-10"
+          className="text-center mb-8 sm:mb-10 md:mb-12 relative z-10"
         >
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-[#CF50F2] via-[#AC79F2] to-[#8552F2]">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 text-transparent bg-clip-text bg-gradient-to-r from-[#CF50F2] via-[#AC79F2] to-[#8552F2]">
             Descubre tu próximo anime
           </h1>
-          <p className="text-xl text-foreground/70">
+          <p className="text-base sm:text-lg md:text-xl text-foreground/70 px-2">
             Selecciona tu mood o géneros favoritos y encuentra algo increíble
           </p>
         </motion.div>
@@ -226,28 +226,28 @@ export default function DiscoverPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-12"
+          className="mb-8 sm:mb-10 md:mb-12"
         >
-          <h2 className="text-2xl font-bold mb-6">¿Cómo te sientes hoy?</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">¿Cómo te sientes hoy?</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
             {MOODS.map((mood) => (
               <motion.button
                 key={mood.label}
                 whileHover={{ scale: 1.08, y: -4 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => selectMood(mood.genres)}
-                className="relative p-6 rounded-2xl bg-gradient-to-br from-[#382059]/40 to-[#2a1844]/40 hover:from-[#382059]/60 hover:to-[#2a1844]/60 border-2 border-[#5a3d8f]/30 hover:border-[#CF50F2]/50 transition-all text-center backdrop-blur-sm shadow-lg hover:shadow-xl hover:shadow-[#CF50F2]/20 group overflow-hidden"
+                className="relative p-3 sm:p-4 md:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#382059]/40 to-[#2a1844]/40 hover:from-[#382059]/60 hover:to-[#2a1844]/60 border-2 border-[#5a3d8f]/30 hover:border-[#CF50F2]/50 transition-all text-center backdrop-blur-sm shadow-lg hover:shadow-xl hover:shadow-[#CF50F2]/20 group overflow-hidden"
               >
                 {/* Efecto de brillo en hover */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#CF50F2]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full" />
                 
                 {/* Icono SVG personalizado con gradiente */}
-                <div className="mb-3 relative z-10 transform group-hover:scale-110 transition-transform duration-300 flex justify-center">
-                  <div className={`w-20 h-20 flex items-center justify-center bg-gradient-to-br ${mood.color} rounded-full p-4 shadow-lg group-hover:shadow-xl transition-shadow`}>
+                <div className="mb-2 sm:mb-3 relative z-10 transform group-hover:scale-110 transition-transform duration-300 flex justify-center">
+                  <div className={`w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 flex items-center justify-center bg-gradient-to-br ${mood.color} rounded-full p-2 sm:p-3 md:p-4 shadow-lg group-hover:shadow-xl transition-shadow`}>
                     <mood.icon />
                   </div>
                 </div>
-                <div className="font-semibold text-foreground relative z-10">{mood.label}</div>
+                <div className="font-semibold text-foreground relative z-10 text-xs sm:text-sm md:text-base">{mood.label}</div>
               </motion.button>
             ))}
           </div>
@@ -258,17 +258,17 @@ export default function DiscoverPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-12"
+          className="mb-8 sm:mb-10 md:mb-12"
         >
-          <h2 className="text-2xl font-bold mb-6">O selecciona géneros específicos</h2>
-          <div className="flex flex-wrap gap-3">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">O selecciona géneros específicos</h2>
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             {GENRES.map((genre) => (
               <motion.button
                 key={genre.id}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => toggleGenre(genre.id)}
-                className={`px-6 py-3 rounded-full font-medium transition-all ${
+                className={`px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-full font-medium transition-all text-sm sm:text-base ${
                   selectedGenres.includes(genre.id)
                     ? 'gradient-primary text-white shadow-lg'
                     : 'bg-card hover:bg-card-hover border border-border'
@@ -285,15 +285,15 @@ export default function DiscoverPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-12 text-center"
+          className="mb-8 sm:mb-10 md:mb-12 text-center"
         >
-          <p className="text-foreground/70 mb-4">¿O prefieres algo totalmente aleatorio?</p>
+          <p className="text-sm sm:text-base text-foreground/70 mb-3 sm:mb-4">¿O prefieres algo totalmente aleatorio?</p>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={fetchRandomAnime}
             disabled={loading}
-            className="px-8 py-4 rounded-xl gradient-accent text-white font-bold text-lg disabled:opacity-50"
+            className="px-6 sm:px-8 py-3 sm:py-4 rounded-lg sm:rounded-xl gradient-accent text-white font-bold text-sm sm:text-base md:text-lg disabled:opacity-50"
           >
             🎲 Sorpréndeme
           </motion.button>
@@ -306,8 +306,8 @@ export default function DiscoverPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="mb-12"
           >
-            <h2 className="text-2xl font-bold mb-6">Tu recomendación aleatoria:</h2>
-            <div className="max-w-sm mx-auto">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Tu recomendación aleatoria:</h2>
+            <div className="max-w-xs sm:max-w-sm mx-auto">
               <AnimeCard anime={randomAnime} />
             </div>
           </motion.div>
@@ -319,17 +319,17 @@ export default function DiscoverPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <h2 className="text-2xl font-bold mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
               Recomendaciones para ti
             </h2>
             {loading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
                 {[...Array(24)].map((_, i) => (
                   <LoadingCard key={i} />
                 ))}
               </div>
             ) : recommendations.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
                 {recommendations.map((anime, index) => (
                   <AnimeCard key={anime.mal_id} anime={anime} index={index} />
                 ))}

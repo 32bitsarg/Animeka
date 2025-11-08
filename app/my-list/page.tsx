@@ -92,16 +92,16 @@ export default function MyListPage() {
   }
 
   return (
-    <div className="min-h-screen py-12">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen py-6 sm:py-8 md:py-12">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-6 sm:mb-8"
         >
-          <h1 className="text-4xl font-bold mb-2">Mi Lista de Anime</h1>
-          <p className="text-foreground/70">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">Mi Lista de Anime</h1>
+          <p className="text-sm sm:text-base text-foreground/70">
             Gestiona tu colección personal de anime
           </p>
         </motion.div>
@@ -110,20 +110,20 @@ export default function MyListPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 overflow-x-auto"
+          className="mb-6 sm:mb-8 overflow-x-auto"
         >
-          <div className="flex space-x-2 min-w-max">
+          <div className="flex space-x-2 min-w-max pb-2">
             {STATUS_TABS.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap ${
+                className={`px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-lg font-medium transition-all whitespace-nowrap text-xs sm:text-sm md:text-base ${
                   activeTab === tab.key
                     ? 'gradient-primary text-white shadow-lg'
                     : 'bg-card hover:bg-card-hover'
                 }`}
               >
-                <span className="mr-2">{tab.emoji}</span>
+                <span className="mr-1 sm:mr-2">{tab.emoji}</span>
                 {tab.label}
               </button>
             ))}
@@ -134,7 +134,7 @@ export default function MyListPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+          className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
         >
           <StatCard
             label="Total"
@@ -160,20 +160,20 @@ export default function MyListPage() {
 
         {/* List */}
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
             {[...Array(12)].map((_, i) => (
               <LoadingCard key={i} />
             ))}
           </div>
         ) : entries.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
             {entries.map((entry, index) => {
               const anime = animeData.get(entry.animeId)
               if (!anime) return null
               return (
                 <div key={entry.id} className="relative">
                   <AnimeCard anime={anime} index={index} />
-                  <div className="mt-2 p-2 bg-card rounded-lg text-sm">
+                  <div className="mt-2 p-2 sm:p-2.5 bg-card rounded-lg text-xs sm:text-sm">
                     <div className="flex justify-between items-center">
                       <span className="text-foreground/70">Progreso:</span>
                       <span className="font-semibold">{entry.progress} eps</span>
@@ -219,11 +219,11 @@ function StatCard({ label, value, emoji }: { label: string; value: number; emoji
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
-      className="bg-card p-6 rounded-xl text-center border border-border hover:border-primary transition-all"
+      className="bg-card p-4 sm:p-5 md:p-6 rounded-xl text-center border border-border hover:border-primary transition-all"
     >
-      <div className="text-3xl mb-2">{emoji}</div>
-      <div className="text-3xl font-bold mb-1">{value}</div>
-      <div className="text-sm text-foreground/60">{label}</div>
+      <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">{emoji}</div>
+      <div className="text-2xl sm:text-3xl font-bold mb-1">{value}</div>
+      <div className="text-xs sm:text-sm text-foreground/60">{label}</div>
     </motion.div>
   )
 }

@@ -62,10 +62,10 @@ function AnimeCard({ anime, index = 0, priority = false }: AnimeCardProps) {
             {anime.score && (
               <motion.div 
                 whileHover={{ scale: 1.1 }}
-                className="absolute top-3 right-3 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#CF50F2] to-[#8552F2] backdrop-blur-md flex items-center space-x-1.5 shadow-lg"
+                className="absolute top-2 sm:top-3 right-2 sm:right-3 px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-[#CF50F2] to-[#8552F2] backdrop-blur-md flex items-center space-x-1 sm:space-x-1.5 shadow-lg"
               >
-                <span className="text-yellow-300 text-lg">★</span>
-                <span className="text-sm font-black text-white">{anime.score}</span>
+                <span className="text-yellow-300 text-sm sm:text-base md:text-lg">★</span>
+                <span className="text-xs sm:text-sm font-black text-white">{anime.score}</span>
               </motion.div>
             )}
 
@@ -74,11 +74,11 @@ function AnimeCard({ anime, index = 0, priority = false }: AnimeCardProps) {
               <motion.div 
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ repeat: Infinity, duration: 2 }}
-                className="absolute top-3 left-3 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#10b981] to-[#059669] backdrop-blur-md shadow-lg"
+                className="absolute top-2 sm:top-3 left-2 sm:left-3 px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-[#10b981] to-[#059669] backdrop-blur-md shadow-lg"
               >
-                <div className="flex items-center space-x-1.5">
-                  <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                  <span className="text-xs font-bold text-white uppercase tracking-wide">En Vivo</span>
+                <div className="flex items-center space-x-1 sm:space-x-1.5">
+                  <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white rounded-full animate-pulse"></span>
+                  <span className="text-[10px] sm:text-xs font-bold text-white uppercase tracking-wide">En Vivo</span>
                 </div>
               </motion.div>
             )}
@@ -92,36 +92,36 @@ function AnimeCard({ anime, index = 0, priority = false }: AnimeCardProps) {
           </div>
 
           {/* Info - Diseño mejorado */}
-          <div className="p-4 flex-1 flex flex-col bg-gradient-to-b from-transparent to-[#382059]/20">
-            <h3 className="font-poppins font-bold text-foreground line-clamp-2 mb-3 text-base group-hover:text-[#CF50F2] transition-colors duration-300">
+          <div className="p-2 sm:p-3 md:p-4 flex-1 flex flex-col bg-gradient-to-b from-transparent to-[#382059]/20">
+            <h3 className="font-poppins font-bold text-foreground line-clamp-2 mb-2 sm:mb-3 text-xs sm:text-sm md:text-base group-hover:text-[#CF50F2] transition-colors duration-300">
               {anime.title}
             </h3>
             
             {/* Metadata con iconos */}
-            <div className="flex items-center justify-between text-sm text-foreground/70 mb-3">
-              <div className="flex items-center space-x-1.5">
-                <span className="text-[#AC79F2]">📺</span>
-                <span className="font-medium">{anime.type}</span>
+            <div className="flex items-center justify-between text-xs sm:text-sm text-foreground/70 mb-2 sm:mb-3">
+              <div className="flex items-center space-x-1 sm:space-x-1.5">
+                <span className="text-[#AC79F2] text-xs sm:text-sm">📺</span>
+                <span className="font-medium truncate max-w-[60px] sm:max-w-none">{anime.type}</span>
               </div>
-              <div className="flex items-center space-x-1.5">
-                <span className="text-[#AC79F2]">🎬</span>
+              <div className="flex items-center space-x-1 sm:space-x-1.5">
+                <span className="text-[#AC79F2] text-xs sm:text-sm">🎬</span>
                 <span className="font-medium">{anime.episodes ? `${anime.episodes} eps` : '?? eps'}</span>
               </div>
             </div>
 
             {/* Genres - Estilo mejorado con valores memoizados */}
             {firstTwoGenres.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-auto">
+              <div className="flex flex-wrap gap-1 sm:gap-1.5 mt-auto">
                 {firstTwoGenres.map((genre) => (
                   <span 
                     key={genre.mal_id}
-                    className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#8552F2]/20 text-[#AC79F2] border border-[#8552F2]/30 hover:bg-[#8552F2]/30 transition-colors"
+                    className="px-1.5 sm:px-2 md:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-[#8552F2]/20 text-[#AC79F2] border border-[#8552F2]/30 hover:bg-[#8552F2]/30 transition-colors"
                   >
                     {genre.name}
                   </span>
                 ))}
                 {remainingGenresCount > 0 && (
-                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#CF50F2]/20 text-[#CF50F2] border border-[#CF50F2]/30">
+                  <span className="px-1.5 sm:px-2 md:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-[#CF50F2]/20 text-[#CF50F2] border border-[#CF50F2]/30">
                     +{remainingGenresCount}
                   </span>
                 )}

@@ -58,22 +58,22 @@ export default function HomePage() {
         description="Explora miles de animes, crea tu lista personal y mantén un seguimiento de tus series favoritas. Todo en un solo lugar, totalmente gratis."
         imageUrl="https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2000"
       >
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-3 sm:gap-4 justify-center">
           <Link href="/discover" prefetch={true}>
-            <Button size="lg" variant="primary">
+            <Button size="lg" variant="primary" className="w-full sm:w-auto">
               <FontAwesomeIcon icon={faCompass} className="mr-2" />
               Descubrir Anime
             </Button>
           </Link>
           <Link href="/search" prefetch={true}>
-            <Button size="lg" variant="outline">
+            <Button size="lg" variant="outline" className="w-full sm:w-auto">
               <FontAwesomeIcon icon={faMagnifyingGlass} className="mr-2" />
               Buscar
             </Button>
           </Link>
           {!loading && (
             <Link href="/auth/signup" prefetch={true}>
-              <Button size="lg" variant="secondary">
+              <Button size="lg" variant="secondary" className="w-full sm:w-auto">
                 <FontAwesomeIcon icon={faListCheck} className="mr-2" />
                 Crear Mi Lista
               </Button>
@@ -175,16 +175,16 @@ export default function HomePage() {
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="relative rounded-2xl gradient-primary p-12 text-center overflow-hidden"
+            className="relative rounded-xl sm:rounded-2xl gradient-primary p-6 sm:p-8 md:p-12 text-center overflow-hidden"
           >
             <div className="relative z-10">
-              <h2 className="text-4xl font-bold text-white mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">
                 ¿Listo para comenzar tu viaje?
               </h2>
-              <p className="text-white/90 text-lg mb-8">
+              <p className="text-white/90 text-sm sm:text-base md:text-lg mb-6 sm:mb-8">
                 Únete a miles de fans del anime y mantén tu colección organizada
               </p>
-              <Button size="lg" className="bg-white text-primary hover:bg-foreground/90">
+              <Button size="lg" className="bg-white text-primary hover:bg-foreground/90 w-full sm:w-auto">
                 Comenzar Ahora - Es Gratis
               </Button>
             </div>
