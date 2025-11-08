@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { AnimeStatus } from '@prisma/client'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -29,7 +30,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     }
 
     const updateData: {
-      status?: string
+      status?: AnimeStatus
       score?: number | null
       progress?: number
       notes?: string | null
@@ -38,7 +39,18 @@ export async function PUT(request: Request, { params }: RouteParams) {
       completedAt?: Date
     } = {}
 
-    if (status !== undefined) updateData.status = status
+    // Validar y asignar status si se proporciona
+    if (status !== undefined) {
+      const validStatuses: AnimeStatus[] = ['WATCHING', 'COMPLETED', 'ON_HOLD', 'DROPPED', 'PLAN_TO_WATCH']
+      if (validStatuses.includes(status as AnimeStatus)) {
+        updateData.status = status as AnimeStatus
+      } else {
+        return NextResponse.json(
+          { error: 'Estado inválido' },
+          { status: 400 }
+        )
+      }
+    }
     if (score !== undefined) updateData.score = score ? (typeof score === 'string' ? parseFloat(score) : score) : null
     if (progress !== undefined) updateData.progress = typeof progress === 'string' ? parseInt(progress, 10) : progress
     if (notes !== undefined) updateData.notes = notes
