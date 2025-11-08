@@ -36,15 +36,22 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(false)
 
   const toggleGenre = (genreId: number) => {
-    setSelectedGenres((prev) =>
-      prev.includes(genreId)
+    setSelectedGenres((prev) => {
+      const newGenres = prev.includes(genreId)
         ? prev.filter((id) => id !== genreId)
         : [...prev, genreId]
-    )
+      // Limpiar anime aleatorio cuando se seleccionan géneros
+      if (newGenres.length > 0) {
+        setRandomAnime(null)
+      }
+      return newGenres
+    })
   }
 
   const selectMood = (genreIds: number[]) => {
     setSelectedGenres(genreIds)
+    // Limpiar anime aleatorio cuando se selecciona un mood
+    setRandomAnime(null)
   }
 
   const fetchRecommendations = async () => {
@@ -67,6 +74,10 @@ export default function DiscoverPage() {
   }
 
   const fetchRandomAnime = async () => {
+    // Limpiar géneros seleccionados y recomendaciones cuando se busca aleatorio
+    setSelectedGenres([])
+    setRecommendations([])
+    
     setLoading(true)
     try {
       let anime = await getRandomAnime()
@@ -92,6 +103,9 @@ export default function DiscoverPage() {
   useEffect(() => {
     if (selectedGenres.length > 0) {
       fetchRecommendations()
+    } else {
+      // Limpiar recomendaciones cuando no hay géneros seleccionados
+      setRecommendations([])
     }
   }, [selectedGenres])
 
@@ -186,8 +200,8 @@ export default function DiscoverPage() {
           </motion.button>
         </motion.div>
 
-        {/* Random Anime Result */}
-        {randomAnime && (
+        {/* Random Anime Result - Solo mostrar si no hay géneros seleccionados */}
+        {randomAnime && selectedGenres.length === 0 && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -200,8 +214,8 @@ export default function DiscoverPage() {
           </motion.div>
         )}
 
-        {/* Recommendations */}
-        {selectedGenres.length > 0 && (
+        {/* Recommendations - Solo mostrar si hay géneros seleccionados y no hay anime aleatorio */}
+        {selectedGenres.length > 0 && !randomAnime && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
