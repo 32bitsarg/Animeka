@@ -4,7 +4,6 @@
  */
 
 import { lazy } from 'react'
-import type { ComponentType } from 'react'
 
 // Componentes pesados que se usan condicionalmente
 export const RecommendationModal = lazy(() => 
@@ -14,16 +13,9 @@ export const RecommendationModal = lazy(() =>
 )
 
 // Si tienes modales o componentes que solo se muestran al hacer clic
-export const SearchModal = lazy(async () => {
-  try {
-    const module = await import('@/components/SearchBar')
-    return { default: module.default }
-  } catch {
-    // Componente fallback que retorna null pero tipado correctamente
-    const FallbackComponent: ComponentType<any> = () => null
-    return { default: FallbackComponent }
-  }
-})
+export const SearchModal = lazy(() => 
+  import('@/components/SearchBar')
+)
 
 // Página de perfil (si es muy pesada)
 export const ProfilePage = lazy(() => 
