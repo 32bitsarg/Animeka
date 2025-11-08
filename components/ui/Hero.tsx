@@ -23,7 +23,7 @@ export default function Hero({
   showStats = true
 }: HeroProps) {
   return (
-    <section className={`relative py-12 sm:py-16 md:py-24 lg:py-32 overflow-hidden ${className}`}>
+    <section className={`relative pt-28 sm:pt-32 md:pt-36 lg:pt-40 pb-12 sm:pb-16 md:pb-24 lg:pb-32 overflow-hidden ${className}`}>
       {/* Background decorativo con gradiente animado */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 opacity-30" />
       <div className="absolute inset-0">
