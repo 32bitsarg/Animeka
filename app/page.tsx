@@ -58,32 +58,30 @@ export default function HomePage() {
         description="Explora miles de animes, crea tu lista personal y mantén un seguimiento de tus series favoritas. Todo en un solo lugar, totalmente gratis."
         imageUrl="https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2000"
       >
-        <div className="flex flex-wrap gap-3 sm:gap-4 justify-center">
-          <Link href="/discover" prefetch={true}>
-            <Button size="lg" variant="primary" className="w-full sm:w-auto">
-              <FontAwesomeIcon icon={faCompass} className="mr-2" />
-              Descubrir Anime
+        <Link href="/discover" prefetch={true}>
+          <Button size="lg" variant="primary" className="w-full sm:w-auto">
+            <FontAwesomeIcon icon={faCompass} className="mr-2" />
+            Descubrir Anime
+          </Button>
+        </Link>
+        <Link href="/search" prefetch={true}>
+          <Button size="lg" variant="outline" className="w-full sm:w-auto">
+            <FontAwesomeIcon icon={faMagnifyingGlass} className="mr-2" />
+            Buscar
+          </Button>
+        </Link>
+        {!loading && (
+          <Link href="/auth/signup" prefetch={true}>
+            <Button size="lg" variant="secondary" className="w-full sm:w-auto">
+              <FontAwesomeIcon icon={faListCheck} className="mr-2" />
+              Crear Mi Lista
             </Button>
           </Link>
-          <Link href="/search" prefetch={true}>
-            <Button size="lg" variant="outline" className="w-full sm:w-auto">
-              <FontAwesomeIcon icon={faMagnifyingGlass} className="mr-2" />
-              Buscar
-            </Button>
-          </Link>
-          {!loading && (
-            <Link href="/auth/signup" prefetch={true}>
-              <Button size="lg" variant="secondary" className="w-full sm:w-auto">
-                <FontAwesomeIcon icon={faListCheck} className="mr-2" />
-                Crear Mi Lista
-              </Button>
-            </Link>
-          )}
-        </div>
+        )}
       </HeroBanner>
 
       {/* Barra de búsqueda */}
-      <Section spacing="md" background="transparent" className="-mt-20">
+      <Section spacing="md" background="transparent" className="-mt-16 md:-mt-20">
         <Container>
           <Suspense fallback={<div className="h-16 bg-card/50 rounded-xl animate-pulse" />}>
             <LazySearchBar />

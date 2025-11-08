@@ -41,12 +41,12 @@ export default function HeroBanner({
 
       {/* Contenido */}
       <div className="relative z-10 h-full flex items-end pb-8 sm:pb-12 md:pb-16 lg:pb-24">
-        <div className="container mx-auto px-3 sm:px-4 md:px-6">
+        <div className="container mx-auto px-3 sm:px-4 md:px-6 w-full">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="max-w-4xl"
+            className="max-w-4xl mt-20 md:mt-24"
           >
             {subtitle && (
               <motion.div
@@ -86,6 +86,7 @@ export default function HeroBanner({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
+              className="flex flex-wrap gap-3 sm:gap-4 justify-center sm:justify-start"
             >
               {children}
             </motion.div>
