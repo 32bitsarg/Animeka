@@ -1,3 +1,5 @@
+'use client'
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { icons, type IconName } from '@/lib/icons'
 import { type SizeProp } from '@fortawesome/fontawesome-svg-core'

@@ -1,3 +1,5 @@
+'use client'
+
 // Centralizar importación de iconos de Font Awesome
 // Esto permite tree-shaking y reduce el tamaño del bundle
 

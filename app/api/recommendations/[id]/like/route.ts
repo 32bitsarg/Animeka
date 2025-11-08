@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
-import { authOptions } from '../../../auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 import { checkRateLimit, rateLimits } from '@/lib/rate-limit'
 
 // POST - Dar/Quitar like a una recomendación
