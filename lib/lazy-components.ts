@@ -17,6 +17,11 @@ export const SearchModal = lazy(() =>
   import('@/components/SearchBar')
 )
 
+// Barra de búsqueda con lazy loading
+export const LazySearchBar = lazy(() => 
+  import('@/components/SearchBar')
+)
+
 // Página de perfil (si es muy pesada)
 export const ProfilePage = lazy(() => 
   import('@/app/perfil/page')

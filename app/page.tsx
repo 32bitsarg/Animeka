@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import AnimeCard from '@/components/AnimeCard'
-import SearchBar from '@/components/SearchBar'
 import { LoadingCard } from '@/components/Loading'
+import { LazySearchBar } from '@/lib/lazy-components'
 import { HeroBanner, Section, Container, SectionHeader, AnimeGrid, Button } from '@/components/ui'
 import { getCurrentSeasonAnime, getTopAnime, getTopRatedAnime } from '@/lib/services/jikan'
 import type { Anime } from '@/lib/types/anime'
