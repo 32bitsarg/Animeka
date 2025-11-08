@@ -42,7 +42,16 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File | null
     const type = formData.get('type') as string | null // 'avatar' o 'banner'
 
+    console.log('📥 Recibiendo upload:', {
+      hasFile: !!file,
+      fileName: file?.name,
+      fileSize: file?.size,
+      fileType: file?.type,
+      type,
+    })
+
     if (!file) {
+      console.error('❌ No se proporcionó ningún archivo')
       return NextResponse.json(
         { success: false, error: 'No se proporcionó ningún archivo' },
         { status: 400 }
@@ -50,6 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!type || (type !== 'avatar' && type !== 'banner')) {
+      console.error('❌ Tipo inválido:', type)
       return NextResponse.json(
         { success: false, error: 'Tipo inválido. Debe ser "avatar" o "banner"' },
         { status: 400 }
@@ -58,6 +68,7 @@ export async function POST(request: NextRequest) {
 
     // Validar tipo de archivo
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      console.error('❌ Tipo de archivo no permitido:', file.type)
       return NextResponse.json(
         { success: false, error: 'Tipo de archivo no permitido. Solo se permiten: JPEG, PNG, WebP' },
         { status: 400 }
@@ -192,9 +203,10 @@ export async function POST(request: NextRequest) {
       message: `${type === 'avatar' ? 'Avatar' : 'Banner'} actualizado correctamente`,
     })
   } catch (error) {
-    console.error('Error uploading image:', error)
+    console.error('❌ Error uploading image:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
     return NextResponse.json(
-      { success: false, error: 'Error al subir la imagen' },
+      { success: false, error: `Error al subir la imagen: ${errorMessage}` },
       { status: 500 }
     )
   }

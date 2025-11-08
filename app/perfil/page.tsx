@@ -179,12 +179,26 @@ export default function PerfilPage() {
     setUploading(true)
 
     try {
-      // Convertir data URL a File
-      const response = await fetch(croppedImageDataUrl)
-      const blob = await response.blob()
-      const file = new File([blob], pendingFile.name, {
+      // Convertir data URL a Blob de manera más directa
+      const base64Data = croppedImageDataUrl.split(',')[1] || croppedImageDataUrl
+      const byteCharacters = atob(base64Data)
+      const byteNumbers = new Array(byteCharacters.length)
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i)
+      }
+      const byteArray = new Uint8Array(byteNumbers)
+      const blob = new Blob([byteArray], { type: 'image/jpeg' })
+      
+      // Crear un File desde el Blob
+      const file = new File([blob], `cropped-${cropType}-${Date.now()}.jpg`, {
         type: 'image/jpeg',
         lastModified: Date.now(),
+      })
+
+      console.log('📤 Subiendo imagen recortada:', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
       })
 
       // Subir la imagen recortada
@@ -197,7 +211,15 @@ export default function PerfilPage() {
         body: formData,
       })
 
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text()
+        console.error('❌ Error HTTP:', uploadResponse.status, errorText)
+        throw new Error(`Error HTTP ${uploadResponse.status}: ${errorText}`)
+      }
+
       const data = await uploadResponse.json()
+
+      console.log('📥 Respuesta del servidor:', data)
 
       if (data.success) {
         await fetchProfile()
@@ -209,11 +231,12 @@ export default function PerfilPage() {
           setEditingBanner(false)
         }
       } else {
+        console.error('❌ Error del servidor:', data.error)
         alert(data.error || 'Error al subir la imagen')
       }
     } catch (error) {
-      console.error('Error uploading image:', error)
-      alert('Error al subir la imagen')
+      console.error('❌ Error uploading image:', error)
+      alert(`Error al subir la imagen: ${error instanceof Error ? error.message : 'Error desconocido'}`)
     } finally {
       setUploading(false)
       setPendingFile(null)
